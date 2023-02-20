@@ -1,16 +1,18 @@
 #pragma once
 #include <memory>
 #include "Transform.h"
+#include "Component.h"
+#include <vector>
 
 namespace dae
 {
 	class Texture2D;
 
-	// todo: this should become final.
-	class GameObject 
+	class GameObject //final
 	{
 	public:
-		virtual void Update();
+		virtual void Update(float deltaTime);
+		virtual void FixedUpdate(float deltaTime);
 		virtual void Render() const;
 
 		void SetTexture(const std::string& filename);
@@ -25,6 +27,8 @@ namespace dae
 
 	private:
 		Transform m_transform{};
+		std::vector<Component*> m_pComponents;
+
 		// todo: mmm, every gameobject has a texture? Is that correct?
 		std::shared_ptr<Texture2D> m_texture{};
 	};

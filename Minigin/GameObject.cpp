@@ -3,9 +3,24 @@
 #include "ResourceManager.h"
 #include "Renderer.h"
 
-dae::GameObject::~GameObject() = default;
+dae::GameObject::~GameObject()
+{
+	for (Component* component : m_pComponents)
+	{
+		delete component;
+		component = nullptr;
+	}
+};
 
-void dae::GameObject::Update(){}
+void dae::GameObject::Update([[maybe_unused]]float deltaTime)
+{
+	
+}
+
+void dae::GameObject::FixedUpdate([[maybe_unused]]float deltaTime)
+{
+	
+}
 
 void dae::GameObject::Render() const
 {
