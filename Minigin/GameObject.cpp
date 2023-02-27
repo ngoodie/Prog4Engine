@@ -12,7 +12,7 @@ dae::GameObject::~GameObject()
 	}
 };
 
-void dae::GameObject::Update([[maybe_unused]]float deltaTime)
+void dae::GameObject::Update(float deltaTime)
 {
 	for (auto& pComp : m_pComponents)
 	{
@@ -20,7 +20,7 @@ void dae::GameObject::Update([[maybe_unused]]float deltaTime)
 	}
 }
 
-void dae::GameObject::FixedUpdate([[maybe_unused]]float deltaTime)
+void dae::GameObject::FixedUpdate(float deltaTime)
 {
 	for (auto& pComp : m_pComponents)
 	{
@@ -38,7 +38,7 @@ void dae::GameObject::Render() const
 
 void dae::GameObject::AddComponent(Component* pComp)
 {
-	pComp->m_pGameObject = this;
+	pComp->InitializeGameObject(this);
 	m_pComponents.push_back(pComp);
 }
 

@@ -14,9 +14,12 @@ dae::FPSComponent::~FPSComponent()
 
 }
 
-void dae::FPSComponent::Update([[maybe_unused]] float deltaTime)
+void dae::FPSComponent::Update(float deltaTime)
 {
-	m_pGameObject->GetComponent<TextComponent>()->SetText("FPS: " + std::to_string(int(1.0f / deltaTime)));
+	if (m_pTextComponent == nullptr)
+		m_pTextComponent = GetGameObject()->GetComponent<TextComponent>();
+	
+	m_pTextComponent->SetText("FPS: " + std::to_string(int(1.0f / deltaTime)));
 }
 
 void dae::FPSComponent::FixedUpdate([[maybe_unused]] float deltaTime)

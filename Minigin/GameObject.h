@@ -63,7 +63,9 @@ namespace dae
 
 		if (it != m_pComponents.end())
 		{
+			delete *it;
 			m_pComponents.erase(it);
+
 			return true;
 		}
 		

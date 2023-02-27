@@ -3,6 +3,7 @@
 
 namespace dae
 {
+	class TextComponent;
 	class FPSComponent : public Component
 	{
 	public:
@@ -12,5 +13,8 @@ namespace dae
 		void Update(float deltaTime) override;
 		void FixedUpdate(float deltaTime) override;
 		void Render() const override {};
+
+	private:
+		TextComponent* m_pTextComponent{ nullptr };
 	};
 }

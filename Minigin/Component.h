@@ -16,7 +16,20 @@ namespace dae
 		Component& operator=(const Component& other) = delete;
 		Component& operator=(Component&& other) = delete;
 
+		void InitializeGameObject(GameObject* pGo)
+		{
+			if (m_pGameObject == nullptr)
+			{
+				m_pGameObject = pGo;
+			}
+		};
+
+	protected:
+		GameObject* GetGameObject() const { return m_pGameObject; };
+
+	private:
 		GameObject* m_pGameObject = nullptr;
-		//std::string m_Id;
+		//TODO:
+		bool m_bMarkedForDeletion{ false };
 	};
 }

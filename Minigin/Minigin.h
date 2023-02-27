@@ -17,6 +17,7 @@ namespace dae
 		Minigin& operator=(Minigin&& other) = delete;
 
 	private:
-		const float fixedTimeStep = 1 / 60.f;
+		const float m_FixedTimeStep = 1 / 60.f;
+		const float m_TargetFps{ 120.f };
 	};
 }
