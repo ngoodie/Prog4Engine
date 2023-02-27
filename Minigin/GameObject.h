@@ -8,15 +8,23 @@ namespace dae
 {
 	class Texture2D;
 
-	class GameObject //final
+	class GameObject final
 	{
 	public:
 		virtual void Update(float deltaTime);
 		virtual void FixedUpdate(float deltaTime);
 		virtual void Render() const;
 
-		void SetTexture(const std::string& filename);
+		void AddComponent(Component* pComp);
+
+		template <typename T>
+		T* GetComponent();
+
+		template <typename T>
+		bool RemoveComponent();
+
 		void SetPosition(float x, float y);
+		glm::vec3 GetPosition() const;
 
 		GameObject() = default;
 		virtual ~GameObject();
@@ -28,8 +36,37 @@ namespace dae
 	private:
 		Transform m_transform{};
 		std::vector<Component*> m_pComponents;
-
-		// todo: mmm, every gameobject has a texture? Is that correct?
-		std::shared_ptr<Texture2D> m_texture{};
 	};
+
+	template<typename T>
+	inline T* GameObject::GetComponent()
+	{
+		//const type_info& typeInfo = typeid(T);
+		auto it = std::find_if(m_pComponents.begin(), m_pComponents.end(), [](Component* pComp)
+			{
+				return dynamic_cast<T*>(pComp) != nullptr; //return typeid(*pComp) == typeInfo;
+			});
+
+		if (it != m_pComponents.end()) return dynamic_cast<T*>(*it);
+
+		return nullptr;
+	}
+
+	template<typename T>
+	bool GameObject::RemoveComponent()
+	{
+		//const type_info& typeInfo = typeid(T);
+		auto it = std::find_if(m_pComponents.begin(), m_pComponents.end(), [](Component* pComp)
+			{
+				return dynamic_cast<T*>(pComp) != nullptr; //return typeid(*pComp) == typeInfo;
+			});
+
+		if (it != m_pComponents.end())
+		{
+			m_pComponents.erase(it);
+			return true;
+		}
+		
+		return false;
+	}
 }

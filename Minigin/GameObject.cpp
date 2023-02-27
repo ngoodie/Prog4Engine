@@ -5,35 +5,49 @@
 
 dae::GameObject::~GameObject()
 {
-	for (Component* component : m_pComponents)
+	for (auto& pComp : m_pComponents)
 	{
-		delete component;
-		component = nullptr;
+		delete pComp;
+		pComp = nullptr;
 	}
 };
 
 void dae::GameObject::Update([[maybe_unused]]float deltaTime)
 {
-	
+	for (auto& pComp : m_pComponents)
+	{
+		pComp->Update(deltaTime);
+	}
 }
 
 void dae::GameObject::FixedUpdate([[maybe_unused]]float deltaTime)
 {
-	
+	for (auto& pComp : m_pComponents)
+	{
+		pComp->FixedUpdate(deltaTime);
+	}
 }
 
 void dae::GameObject::Render() const
 {
-	const auto& pos = m_transform.GetPosition();
-	Renderer::GetInstance().RenderTexture(*m_texture, pos.x, pos.y);
+	for (auto& pComp : m_pComponents)
+	{
+		pComp->Render();
+	}
 }
 
-void dae::GameObject::SetTexture(const std::string& filename)
+void dae::GameObject::AddComponent(Component* pComp)
 {
-	m_texture = ResourceManager::GetInstance().LoadTexture(filename);
+	pComp->m_pGameObject = this;
+	m_pComponents.push_back(pComp);
 }
 
 void dae::GameObject::SetPosition(float x, float y)
 {
 	m_transform.SetPosition(x, y, 0.0f);
+}
+
+glm::vec3 dae::GameObject::GetPosition() const
+{
+	return m_transform.GetPosition();
 }
