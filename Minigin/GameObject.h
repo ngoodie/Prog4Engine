@@ -23,8 +23,15 @@ namespace dae
 		template <typename T>
 		bool RemoveComponent();
 
+		void SetParent(GameObject* pParent);
+		GameObject* GetParent() const { return m_pParent; };
+
+		void AddChild(GameObject* pChild);
+		bool RemoveChild(GameObject* pChild);
+
 		void SetPosition(float x, float y);
 		glm::vec3 GetPosition() const;
+		glm::vec3 GetWorldPosition() const;
 
 		GameObject() = default;
 		virtual ~GameObject();
@@ -36,6 +43,9 @@ namespace dae
 	private:
 		Transform m_transform{};
 		std::vector<Component*> m_pComponents;
+
+		GameObject* m_pParent = nullptr;
+		std::vector<GameObject*> m_pChildren;
 	};
 
 	template<typename T>
