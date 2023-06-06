@@ -29,9 +29,11 @@ namespace dae
 		void AddChild(GameObject* pChild);
 		bool RemoveChild(GameObject* pChild);
 
+		void SetDirty(bool isDirty);
+
 		void SetPosition(float x, float y);
 		glm::vec3 GetPosition() const;
-		glm::vec3 GetWorldPosition() const;
+		glm::vec3 GetWorldPosition();
 
 		GameObject() = default;
 		virtual ~GameObject();
@@ -41,7 +43,7 @@ namespace dae
 		GameObject& operator=(GameObject&& other) = delete;
 
 	private:
-		Transform m_transform{};
+		Transform m_Transform{};
 		std::vector<Component*> m_pComponents;
 
 		GameObject* m_pParent = nullptr;
@@ -52,10 +54,9 @@ namespace dae
 	inline T* GameObject::GetComponent()
 	{
 		//const type_info& typeInfo = typeid(T);
-		auto it = std::find_if(m_pComponents.begin(), m_pComponents.end(), [](Component* pComp)
-			{
-				return dynamic_cast<T*>(pComp) != nullptr; //return typeid(*pComp) == typeInfo;
-			});
+		auto it = std::find_if(m_pComponents.begin(), m_pComponents.end(), [](Component* pComp)	{
+			return dynamic_cast<T*>(pComp) != nullptr; //return typeid(*pComp) == typeInfo;
+		});
 
 		if (it != m_pComponents.end()) return dynamic_cast<T*>(*it);
 
@@ -66,10 +67,9 @@ namespace dae
 	bool GameObject::RemoveComponent()
 	{
 		//const type_info& typeInfo = typeid(T);
-		auto it = std::find_if(m_pComponents.begin(), m_pComponents.end(), [](Component* pComp)
-			{
-				return dynamic_cast<T*>(pComp) != nullptr; //return typeid(*pComp) == typeInfo;
-			});
+		auto it = std::find_if(m_pComponents.begin(), m_pComponents.end(), [](Component* pComp)	{
+			return dynamic_cast<T*>(pComp) != nullptr; //return typeid(*pComp) == typeInfo;
+		});
 
 		if (it != m_pComponents.end())
 		{

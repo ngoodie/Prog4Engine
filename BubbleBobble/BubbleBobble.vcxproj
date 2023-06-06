@@ -145,9 +145,11 @@
   <ItemGroup>
     <ClCompile Include="BubbleBobble.cpp" />
     <ClCompile Include="FPSComponent.cpp" />
+    <ClCompile Include="RotatorComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FPSComponent.h" />
+    <ClInclude Include="RotatorComponent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

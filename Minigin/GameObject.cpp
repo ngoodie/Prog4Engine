@@ -48,39 +48,28 @@ void dae::GameObject::SetParent(GameObject* pParent)
 	{
 		m_pParent->RemoveChild(this);
 	}
-
 	m_pParent = pParent;
-	//m_pParent->AddChild(this);
 
-	//Update pos/rot/scale
+	SetDirty(true);
 }
 
 void dae::GameObject::AddChild(GameObject* pChild)
 {
-	if (pChild->GetParent() != nullptr)
-	{
-		pChild->GetParent()->RemoveChild(pChild);
-	}
-
 	pChild->SetParent(this);
-	m_pChildren.push_back(pChild);
 
-	//Update pos/rot/scale
+	m_pChildren.push_back(pChild);
 }
 
 bool dae::GameObject::RemoveChild(GameObject* pChild)
 {
-	auto it = std::find_if(m_pChildren.begin(), m_pChildren.end(), [&pChild](GameObject* pCurrentChild)
-		{
-			return pChild == pCurrentChild;
-		});
+	auto it = std::find_if(m_pChildren.begin(), m_pChildren.end(), [&pChild](GameObject* pCurrentChild)	{
+		return pChild == pCurrentChild;
+	});
 
 	if (it != m_pChildren.end())
 	{
 		pChild->SetParent(nullptr);
 		m_pChildren.erase(it);
-
-		//Update pos/rot/scale
 
 		return true;
 	}
@@ -88,21 +77,50 @@ bool dae::GameObject::RemoveChild(GameObject* pChild)
 	return false;
 }
 
+void dae::GameObject::SetDirty(bool isDirty)
+{
+	m_Transform.SetDirty(isDirty);
+}
+
 void dae::GameObject::SetPosition(float x, float y)
 {
-	m_transform.SetPosition(x, y, 0.0f);
+	m_Transform.SetPosition(x, y, 0.0f);
+
+	for (auto pChild : m_pChildren)
+	{
+		pChild->SetDirty(true);
+	}
 }
 
 glm::vec3 dae::GameObject::GetPosition() const
 {
-	return m_transform.GetPosition();
+	return m_Transform.GetPosition();
 }
 
-glm::vec3 dae::GameObject::GetWorldPosition() const
+glm::vec3 dae::GameObject::GetWorldPosition()
 {
-	if (m_pParent != nullptr)
+	if (m_Transform.IsDirty())
 	{
-		return m_pParent->GetWorldPosition() + GetPosition();
+		m_Transform.SetDirty(false);
+		if (m_pParent != nullptr)
+		{
+			m_Transform.SetCachedPosition(m_pParent->GetWorldPosition());
+			return m_Transform.GetCachedPosition() + GetPosition();
+		}
+		else
+		{
+			return GetPosition();
+		}
 	}
-	return GetPosition();
+	else //if not dirty
+	{
+		if (m_pParent != nullptr)
+		{
+			return m_Transform.GetCachedPosition() + GetPosition();
+		}
+		else
+		{
+			return GetPosition();
+		}
+	}
 }

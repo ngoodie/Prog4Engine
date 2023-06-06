@@ -16,6 +16,7 @@
 #include "Scene.h"
 
 #include "FPSComponent.h"
+#include "RotatorComponent.h"
 
 void load()
 {
@@ -45,19 +46,28 @@ void load()
 	go->SetPosition(10, 10);
 	scene.Add(go);
 
+	// Sprite#2
+	go = std::make_shared<dae::GameObject>();
+	go->AddComponent(new dae::RotatorComponent(20.f, 7.5f, true));
+	go->AddComponent(new dae::TextureComponent("pacman2.png"));
+	//go->SetParent(pSprite1);
+	go->SetPosition(20, 20);
+	auto pSprite2 = go.get();
+	scene.Add(go);
+
 	// Sprite#1
 	go = std::make_shared<dae::GameObject>();
+	go->AddComponent(new dae::RotatorComponent(20.f, 7.5f, false));
 	go->AddComponent(new dae::TextureComponent("pacman.png"));
-	go->SetPosition(100, 100);
 	auto pSprite1 = go.get();
 	scene.Add(go);
 
-	// Sprite#2
 	go = std::make_shared<dae::GameObject>();
-	go->AddComponent(new dae::TextureComponent("pacman2.png"));
-	go->SetParent(pSprite1);
-	go->SetPosition(20, 20);
+	go->SetPosition(100, 100);
+	go->AddChild(pSprite1);
 	scene.Add(go);
+
+	pSprite1->AddChild(pSprite2);
 }
 
 int main(int, char* []) {
