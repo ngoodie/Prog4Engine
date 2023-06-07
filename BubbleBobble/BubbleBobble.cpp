@@ -18,6 +18,8 @@
 #include "FPSComponent.h"
 #include "RotatorComponent.h"
 
+#include "InputManager.h"
+
 void load()
 {
 	auto& scene = dae::SceneManager::GetInstance().CreateScene("Demo");
@@ -68,6 +70,12 @@ void load()
 	scene.Add(go);
 
 	pSprite1->AddChild(pSprite2);
+
+	//command/input test
+	dae::Command* pTestCommand = new dae::TestCommand(pSprite1);
+
+	auto& input = dae::InputManager::GetInstance();
+	input.AddControllerCommand(0, dae::ContollerButton::ButtonA, pTestCommand);
 }
 
 int main(int, char* []) {
