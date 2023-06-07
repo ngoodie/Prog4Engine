@@ -75,7 +75,21 @@ void load()
 	dae::Command* pTestCommand = new dae::TestCommand(pSprite1);
 
 	auto& input = dae::InputManager::GetInstance();
-	input.AddControllerCommand(0, dae::ContollerButton::ButtonA, pTestCommand);
+	input.AddControllerCommand(scene.GetId(), 0, dae::ControllerButton::ButtonA, dae::PressType::HELD, pTestCommand);
+
+	pTestCommand = new dae::TestCommand(pSprite1);
+	input.AddKeyboardCommand(scene.GetId(), SDL_SCANCODE_A, dae::PressType::DOWN, pTestCommand);
+
+	auto& scene2 = dae::SceneManager::GetInstance().CreateScene("Demo2");
+	go = std::make_shared<dae::GameObject>();
+	go->SetPosition(200, 200);
+	go->AddComponent(new dae::TextureComponent("pacman2.png"));
+	scene2.Add(go);
+
+	dae::SceneManager::GetInstance().SetScene("Demo2");
+
+	pTestCommand = new dae::TestCommand(pSprite1);
+	input.AddKeyboardCommand(scene2.GetId(), SDL_SCANCODE_Y, dae::PressType::DOWN, pTestCommand);
 }
 
 int main(int, char* []) {

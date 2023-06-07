@@ -1,63 +1,79 @@
 #pragma once
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <XInput.h>
-#include <SDL.h>
 #include "Command.h"
 #include "Singleton.h"
 #include <map>
 
 namespace dae
 {
-	enum class ContollerButton : WORD
+	const unsigned int MAX_KEYCODES = 512;
+
+	enum class ControllerButton : unsigned int
 	{
-		DPadUp	= 0x0001,
+		DPadUp = 0x0001,
 		DPadDown = 0x0002,
 		DPadLeft = 0x0004,
-		DPadRight =	0x0008,
-		Start =	0x0010,
+		DPadRight = 0x0008,
+		Start = 0x0010,
 		Back = 0x0020,
-		LeftThumb =	0x0040,
+		LeftThumb = 0x0040,
 		RightThumb = 0x0080,
 		LeftShoulder = 0x0100,
-		RightShoulder =	0x0200,
+		RightShoulder = 0x0200,
 		ButtonA = 0x1000,
 		ButtonB = 0x2000,
 		ButtonX = 0x4000,
 		ButtonY = 0x8000
 	};
 
+	enum class PressType : unsigned int
+	{
+		DOWN,
+		UP,
+		HELD
+	};
+
+	using ControllerButtonAndPressType = std::pair<ControllerButton, PressType>;
+	struct ControllerButtonAndPressTypeCompare
+	{
+		bool operator()(const ControllerButtonAndPressType& a, const ControllerButtonAndPressType& b) const
+		{
+			if (a.first < b.first) return true;
+			else if (a.first == b.first) return a.second < b.second;
+
+			return false;
+		}
+	};
+
+	using KeyboardButtonAndPressType = std::pair<unsigned int, PressType>;
+	struct KeyboardButtonAndPressTypeCompare
+	{
+		bool operator()(const KeyboardButtonAndPressType& a, const KeyboardButtonAndPressType& b) const
+		{
+			if (a.first < b.first) return true;
+			else if (a.first == b.first) return a.second < b.second;
+
+			return false;
+		}
+	};
+
 	class InputManager final : public Singleton<InputManager>
 	{
 	public:
-		bool ProcessInput();
+		InputManager();
 
+		bool ProcessInput(unsigned int sceneId);
+
+		void AddControllerCommand(unsigned int sceneId, int controllerId, ControllerButton controllerButton, PressType pressType, Command* pCommand);
+		void AddKeyboardCommand(unsigned int sceneId, unsigned int keyboardButton, PressType pressType, Command* pCommand);
 		~InputManager() override;
-
-		bool IsButtonDown(int controllerId, WORD button);
-		bool IsButtonUp(int controllerId, WORD button);
-		bool IsButtonPressed(int controllerId, WORD button);
-
-		float LeftThumbstickX(int controllerId);
-		float LeftThumbstickY(int controllerId);
-		float RightThumbstickX(int controllerId);
-		float RightThumbstickY(int controllerId);
-
-		void AddControllerCommand(int controllerId, dae::ContollerButton controllerButton, Command* pCommand)
-		{
-			m_ControllerCommands[controllerId][controllerButton] = pCommand;
-		}
 
 		//void ClearAllCommands();
 
 	private:
-		const int m_NrMaxControllers{ 4 };
+		class ControllersImpl;
+		ControllersImpl* pControllerImpl;
 
-		XINPUT_STATE m_ControllerState[4];
-		XINPUT_STATE m_PreviousControllerState[4];
-
-		std::map<dae::ContollerButton, Command*> m_ControllerCommands[4];
-
-		const float m_DeadZone = 0.2f;
+		class KeyboardImpl;
+		KeyboardImpl* pKeyboardImpl;
 	};
 }

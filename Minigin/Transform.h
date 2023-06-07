@@ -14,8 +14,8 @@ namespace dae
 		void SetDirty(bool isDirty) { m_IsDirty = isDirty; }
 
 	private:
-		glm::vec3 m_Position;
-		glm::vec3 m_CachedPosition;
+		glm::vec3 m_Position{};
+		glm::vec3 m_CachedPosition{};
 		bool m_IsDirty = false;
 	};
 }

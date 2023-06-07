@@ -1,5 +1,7 @@
 #pragma once
 #include "SceneManager.h"
+//#include "InputManager.h"
+#include <map>
 
 namespace dae
 {
@@ -16,19 +18,46 @@ namespace dae
 		void FixedUpdate(float deltaTime);
 		void Render() const;
 
+		unsigned int GetId() const { return m_Id; }
+		std::string GetName() const { return m_Name; }
+
 		~Scene();
 		Scene(const Scene& other) = delete;
 		Scene(Scene&& other) = delete;
 		Scene& operator=(const Scene& other) = delete;
 		Scene& operator=(Scene&& other) = delete;
 
+		/*
+		void AddControllerCommand(int controllerId, ControllerButton controllerButton, PressType pressType, Command* pCommand)
+		{
+			ControllerButtonAndPressType buttonAndType;
+			buttonAndType.first = controllerButton;
+			buttonAndType.second = pressType;
+
+			m_ControllerCommands[controllerId][buttonAndType] = pCommand;
+		}
+
+		void AddKeyboardCommand(unsigned int keyboardButton, PressType pressType, Command* pCommand)
+		{
+			KeyboardButtonAndPressType keyAndType;
+			keyAndType.first = keyboardButton;
+			keyAndType.second = pressType;
+
+			m_KeyboardCommands[keyAndType] = pCommand;
+		}
+		*/
+
 	private: 
 		explicit Scene(const std::string& name);
 
-		std::string m_name;
-		std::vector <std::shared_ptr<GameObject>> m_objects{};
+		static unsigned int m_Count;
 
-		static unsigned int m_idCounter; 
+		std::string m_Name;
+		unsigned int m_Id;
+
+		std::vector <std::shared_ptr<GameObject>> m_pGameObjects{};
+
+		//std::map<KeyboardButtonAndPressType, Command*, KeyboardButtonAndPressTypeCompare> m_KeyboardCommands;
+		//std::map<ControllerButtonAndPressType, Command*, KeyboardButtonAndPressTypeCompare> m_ControllerCommands[4];
 	};
-
 }
