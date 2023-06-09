@@ -18,7 +18,8 @@
 
 #include "FPSComponent.h"
 #include "RotatorComponent.h"
-#include "TranslateComponent.h"
+#include "BubblesGeneratorComponent.h"
+//#include "TranslateComponent.h"
 
 #include "InputManager.h"
 
@@ -145,29 +146,10 @@ namespace dae
 		pIntroScene.Add(pPlayerTwoRotationPointGo);
 
 		// Bubbles
-		auto pBubble = std::make_shared<GameObject>();
-		pAnimTexComp = pBubble->AddComponent(new AnimatedTextureComponent("bubbles_intro.png", 32, 32, 6, 1));
-		pBubble->AddComponent(new TranslateComponent(-1.f, -1.f, 150.f));
-		pBubble->SetPosition(screenWidth / 2 - pAnimTexComp->GetSpriteWidth() / 2.f, screenHeight / 2 - pAnimTexComp->GetSpriteHeight() / 2.f);
-		pAnimTexComp->SetSpritesPerSecond(5);
-		pAnimTexComp->Play(0, 6, true);
-		pIntroScene.Add(pBubble);
-
-		pBubble = std::make_shared<GameObject>();
-		pAnimTexComp = pBubble->AddComponent(new AnimatedTextureComponent("bubbles_intro.png", 32, 32, 6, 1));
-		pBubble->AddComponent(new TranslateComponent(-1.f, 0.f, 150.f));
-		pBubble->SetPosition(screenWidth / 2 - pAnimTexComp->GetSpriteWidth() / 2.f, screenHeight / 2 - pAnimTexComp->GetSpriteHeight() / 2.f);
-		pAnimTexComp->SetSpritesPerSecond(5);
-		pAnimTexComp->Play(0, 6, true);
-		pIntroScene.Add(pBubble);
-
-		pBubble = std::make_shared<GameObject>();
-		pAnimTexComp = pBubble->AddComponent(new AnimatedTextureComponent("bubbles_intro.png", 32, 32, 6, 1));
-		pBubble->AddComponent(new TranslateComponent(-1.f, 1.f, 150.f));
-		pBubble->SetPosition(screenWidth / 2 - pAnimTexComp->GetSpriteWidth() / 2.f, screenHeight / 2 - pAnimTexComp->GetSpriteHeight() / 2.f);
-		pAnimTexComp->SetSpritesPerSecond(5);
-		pAnimTexComp->Play(0, 6, true);
-		pIntroScene.Add(pBubble);
+		auto pBubblesGenerator = std::make_shared<GameObject>();
+		pBubblesGenerator->AddComponent(new BubblesGeneratorComponent(1 / 20.f, 17.5f, 200.f, 50));
+		pBubblesGenerator->SetPosition(screenWidth / 2, screenHeight / 2);
+		pIntroScene.Add(pBubblesGenerator);
 
 		// Commands
 		pTestCommand = new TestCommand(pPlayerOne.get());
