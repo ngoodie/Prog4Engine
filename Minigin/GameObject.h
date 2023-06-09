@@ -15,7 +15,8 @@ namespace dae
 		virtual void FixedUpdate(float deltaTime);
 		virtual void Render() const;
 
-		void AddComponent(Component* pComp);
+		template <typename T>
+		T* AddComponent(T* pComp);
 
 		template <typename T>
 		T* GetComponent();
@@ -23,10 +24,9 @@ namespace dae
 		template <typename T>
 		bool RemoveComponent();
 
-		void SetParent(GameObject* pParent);
 		GameObject* GetParent() const { return m_pParent; };
 
-		void AddChild(GameObject* pChild);
+		void AddChild(std::shared_ptr<GameObject> pChild);
 		bool RemoveChild(GameObject* pChild);
 
 		void SetDirty(bool isDirty);
@@ -47,8 +47,19 @@ namespace dae
 		std::vector<Component*> m_pComponents;
 
 		GameObject* m_pParent = nullptr;
-		std::vector<GameObject*> m_pChildren;
+		std::vector<std::shared_ptr<GameObject>> m_pChildren;
+
+		void SetParent(GameObject* pParent);
 	};
+
+	template <typename T>
+	T* GameObject::AddComponent(T* pComp)
+	{
+		pComp->InitializeGameObject(this);
+		m_pComponents.push_back(pComp);
+
+		return pComp;
+	}
 
 	template<typename T>
 	inline T* GameObject::GetComponent()

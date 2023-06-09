@@ -12,88 +12,174 @@
 #include "ResourceManager.h"
 #include "GameObject.h"
 #include "TextureComponent.h"
+#include "AnimatedTextureComponent.h"
 #include "TextComponent.h"
 #include "Scene.h"
 
 #include "FPSComponent.h"
 #include "RotatorComponent.h"
+#include "TranslateComponent.h"
 
 #include "InputManager.h"
 
-void load()
+//using namespace dae;
+
+namespace dae
 {
-	auto& scene = dae::SceneManager::GetInstance().CreateScene("Demo");
+	void load()
+	{
+		float screenWidth = 256 * 2;
+		float screenHeight = 224 * 2;
 
-	auto go = std::make_shared<dae::GameObject>();
-	go->AddComponent(new dae::TextureComponent("background.tga"));
-	scene.Add(go);
+		auto& input = InputManager::GetInstance();
 
-	go = std::make_shared<dae::GameObject>();
-	go->AddComponent(new dae::TextureComponent("logo.tga"));
-	go->SetPosition(216, 180);
-	scene.Add(go);
+		// Scene #1
+		auto& pDemoScene = SceneManager::GetInstance().CreateScene("Demo");
 
-	go = std::make_shared<dae::GameObject>();
-	auto font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
-	go->AddComponent(new dae::TextComponent("Programming 4 Assignment", font));
-	go->SetPosition(80, 20);
-	scene.Add(go);
+		// Background
+		auto pBackgroundGo = std::make_shared<GameObject>();
+		pBackgroundGo->AddComponent(new TextureComponent("background.tga"));
+		pDemoScene.Add(pBackgroundGo);
 
-	// FPS Counter
-	go = std::make_shared<dae::GameObject>();
-	font = dae::ResourceManager::GetInstance().LoadFont("Lingua.otf", 14);
-	go->AddComponent(new dae::TextComponent("0", font));
-	go->AddComponent(new dae::FPSComponent());
-	//go->RemoveComponent<dae::FPSComponent>();
-	go->SetPosition(10, 10);
-	scene.Add(go);
+		// Logo
+		auto pLogoGo = std::make_shared<GameObject>();
+		pLogoGo->AddComponent(new TextureComponent("logo.tga"));
+		pLogoGo->SetPosition(216, 180);
+		pDemoScene.Add(pLogoGo);
 
-	// Sprite#2
-	go = std::make_shared<dae::GameObject>();
-	go->AddComponent(new dae::RotatorComponent(20.f, 7.5f, true));
-	go->AddComponent(new dae::TextureComponent("pacman2.png"));
-	//go->SetParent(pSprite1);
-	go->SetPosition(20, 20);
-	auto pSprite2 = go.get();
-	scene.Add(go);
+		// Text
+		auto pHeadTextGo = std::make_shared<GameObject>();
+		auto pFont36 = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
+		pHeadTextGo->AddComponent(new TextComponent("Programming 4 Assignment", pFont36, 255, 255, 255));
+		pHeadTextGo->SetPosition(80, 20);
+		pDemoScene.Add(pHeadTextGo);
 
-	// Sprite#1
-	go = std::make_shared<dae::GameObject>();
-	go->AddComponent(new dae::RotatorComponent(20.f, 7.5f, false));
-	go->AddComponent(new dae::TextureComponent("pacman.png"));
-	auto pSprite1 = go.get();
-	scene.Add(go);
+		// FPS Counter
+		auto pFpsGo = std::make_shared<GameObject>();
+		auto pFont14 = ResourceManager::GetInstance().LoadFont("Lingua.otf", 14);
+		pFpsGo->AddComponent(new TextComponent("0", pFont14, 255, 255, 255));
+		pFpsGo->AddComponent(new FPSComponent());
+		pFpsGo->SetPosition(10, 10);
+		pDemoScene.Add(pFpsGo);
 
-	go = std::make_shared<dae::GameObject>();
-	go->SetPosition(100, 100);
-	go->AddChild(pSprite1);
-	scene.Add(go);
+		// Sprite#1
+		auto pSprite1 = std::make_shared<GameObject>();
+		pSprite1->AddComponent(new RotatorComponent(20.f, 7.5f, false));
+		pSprite1->AddComponent(new TextureComponent("pacman.png"));
 
-	pSprite1->AddChild(pSprite2);
+		// Sprite#2
+		auto pSprite2 = std::make_shared<GameObject>();
+		pSprite2->AddComponent(new RotatorComponent(20.f, 7.5f, true));
+		pSprite2->AddComponent(new TextureComponent("pacman2.png"));
+		pSprite1->AddChild(pSprite2);
 
-	//command/input test
-	dae::Command* pTestCommand = new dae::TestCommand(pSprite1);
+		auto pAnchorGo = std::make_shared<GameObject>();
+		pAnchorGo->SetPosition(100, 100);
+		pAnchorGo->AddChild(pSprite1);
+		pDemoScene.Add(pAnchorGo);
 
-	auto& input = dae::InputManager::GetInstance();
-	input.AddControllerCommand(scene.GetId(), 0, dae::ControllerButton::ButtonA, dae::PressType::HELD, pTestCommand);
+		// Commands
+		Command* pTestCommand = new TestCommand(pSprite1.get());
 
-	pTestCommand = new dae::TestCommand(pSprite1);
-	input.AddKeyboardCommand(scene.GetId(), SDL_SCANCODE_A, dae::PressType::DOWN, pTestCommand);
+		input.AddControllerCommand(pDemoScene.GetId(), 0, ControllerButton::ButtonA, PressType::HELD, pTestCommand);
 
-	auto& scene2 = dae::SceneManager::GetInstance().CreateScene("Demo2");
-	go = std::make_shared<dae::GameObject>();
-	go->SetPosition(200, 200);
-	go->AddComponent(new dae::TextureComponent("pacman2.png"));
-	scene2.Add(go);
+		pTestCommand = new TestCommand(pSprite1.get());
+		input.AddKeyboardCommand(pDemoScene.GetId(), SDL_SCANCODE_A, PressType::DOWN, pTestCommand);
+		
+		// Scene #2
+		auto arcadeFont = ResourceManager::GetInstance().LoadFont("Emulogic.ttf", 16);
+		auto& pIntroScene = SceneManager::GetInstance().CreateScene("Intro");
 
-	dae::SceneManager::GetInstance().SetScene("Demo2");
+		auto pBackgroundStars = std::make_shared<GameObject>();
+		auto pStarsAnimTexComp = pBackgroundStars->AddComponent(new AnimatedTextureComponent("stars_animated.png", static_cast<int>(screenWidth), static_cast<int>(screenHeight), 2, 2));
+		pStarsAnimTexComp->SetSpritesPerSecond(2);
+		pStarsAnimTexComp->Play(0, 3, false, true);
+		pIntroScene.Add(pBackgroundStars);
 
-	pTestCommand = new dae::TestCommand(pSprite1);
-	input.AddKeyboardCommand(scene2.GetId(), SDL_SCANCODE_Y, dae::PressType::DOWN, pTestCommand);
+		// Text
+		auto pTextGo = std::make_shared<GameObject>();
+		auto pTextComp = pTextGo->AddComponent(new TextComponent("NOW,IT IS BEGINNING OF A", arcadeFont, 0, 0, 0));
+		pTextComp->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.5f);
+		pTextGo->SetPosition(screenWidth / 2.f - pTextComp->GetWidth() / 2.f, 28);
+		pIntroScene.Add(pTextGo);
+
+		pTextGo = std::make_shared<GameObject>();
+		pTextComp = pTextGo->AddComponent(new TextComponent("FANTASTIC STORY!! LET'S MAKE A", arcadeFont, 255, 0, 0));
+		pTextComp->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.5f);
+		pTextGo->SetPosition(screenWidth / 2.f - pTextComp->GetWidth() / 2.f, 60);
+		pIntroScene.Add(pTextGo);
+
+		pTextGo = std::make_shared<GameObject>();
+		pTextComp = pTextGo->AddComponent(new TextComponent("JOURNEY TO THE CAVE OF MONSTERS!", arcadeFont, 255, 0, 0));
+		pTextComp->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.5f);
+		pTextGo->SetPosition(screenWidth / 2.f - pTextComp->GetWidth() / 2.f, 92);
+		pIntroScene.Add(pTextGo);
+
+		pTextGo = std::make_shared<GameObject>();
+		pTextComp = pTextGo->AddComponent(new TextComponent("GOOD LUCK!", arcadeFont, 255, 0, 0));
+		pTextComp->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.5f);
+		pTextGo->SetPosition(screenWidth / 2.f - pTextComp->GetWidth() / 2.f, 124);
+		pIntroScene.Add(pTextGo);
+
+		// Rotating players
+		auto pPlayerOne = std::make_shared<GameObject>();
+		auto pAnimTexComp = pPlayerOne->AddComponent(new AnimatedTextureComponent("player1.png", 64, 64, 8, 5));
+		pAnimTexComp->SetSpritesPerSecond(5);
+		pAnimTexComp->Play(30, 31);
+		pPlayerOne->AddComponent(new RotatorComponent(16.f, 4.f, false));
+
+		auto pPlayerOneRotationPointGo = std::make_shared<GameObject>();
+		pPlayerOneRotationPointGo->SetPosition(screenWidth / 4 - pAnimTexComp->GetSpriteWidth() / 2.f, screenHeight / 2 - pAnimTexComp->GetSpriteHeight() / 2.f);
+		pPlayerOneRotationPointGo->AddChild(pPlayerOne);
+		pIntroScene.Add(pPlayerOneRotationPointGo);
+
+		auto pPlayerTwo = std::make_shared<GameObject>();
+		pAnimTexComp = pPlayerTwo->AddComponent(new AnimatedTextureComponent("player2.png", 64, 64, 8, 5));
+		pAnimTexComp->SetSpritesPerSecond(5);
+		pAnimTexComp->Play(30, 31);
+		pPlayerTwo->AddComponent(new RotatorComponent(16.f, 4.f, true));
+
+		auto pPlayerTwoRotationPointGo = std::make_shared<GameObject>();
+		pPlayerTwoRotationPointGo->SetPosition(screenWidth - screenWidth / 4 - pAnimTexComp->GetSpriteWidth() / 2.f, screenHeight / 2 - pAnimTexComp->GetSpriteHeight() / 2.f);
+		pPlayerTwoRotationPointGo->AddChild(pPlayerTwo);
+		pIntroScene.Add(pPlayerTwoRotationPointGo);
+
+		// Bubbles
+		auto pBubble = std::make_shared<GameObject>();
+		pAnimTexComp = pBubble->AddComponent(new AnimatedTextureComponent("bubbles_intro.png", 32, 32, 6, 1));
+		pBubble->AddComponent(new TranslateComponent(-1.f, -1.f, 150.f));
+		pBubble->SetPosition(screenWidth / 2 - pAnimTexComp->GetSpriteWidth() / 2.f, screenHeight / 2 - pAnimTexComp->GetSpriteHeight() / 2.f);
+		pAnimTexComp->SetSpritesPerSecond(5);
+		pAnimTexComp->Play(0, 6, true);
+		pIntroScene.Add(pBubble);
+
+		pBubble = std::make_shared<GameObject>();
+		pAnimTexComp = pBubble->AddComponent(new AnimatedTextureComponent("bubbles_intro.png", 32, 32, 6, 1));
+		pBubble->AddComponent(new TranslateComponent(-1.f, 0.f, 150.f));
+		pBubble->SetPosition(screenWidth / 2 - pAnimTexComp->GetSpriteWidth() / 2.f, screenHeight / 2 - pAnimTexComp->GetSpriteHeight() / 2.f);
+		pAnimTexComp->SetSpritesPerSecond(5);
+		pAnimTexComp->Play(0, 6, true);
+		pIntroScene.Add(pBubble);
+
+		pBubble = std::make_shared<GameObject>();
+		pAnimTexComp = pBubble->AddComponent(new AnimatedTextureComponent("bubbles_intro.png", 32, 32, 6, 1));
+		pBubble->AddComponent(new TranslateComponent(-1.f, 1.f, 150.f));
+		pBubble->SetPosition(screenWidth / 2 - pAnimTexComp->GetSpriteWidth() / 2.f, screenHeight / 2 - pAnimTexComp->GetSpriteHeight() / 2.f);
+		pAnimTexComp->SetSpritesPerSecond(5);
+		pAnimTexComp->Play(0, 6, true);
+		pIntroScene.Add(pBubble);
+
+		// Commands
+		pTestCommand = new TestCommand(pPlayerOne.get());
+		input.AddKeyboardCommand(pIntroScene.GetId(), SDL_SCANCODE_Y, PressType::DOWN, pTestCommand);
+
+		SceneManager::GetInstance().SetScene("Intro");
+	}
 }
 
-int main(int, char* []) {
+int main(int, char* [])
+{
 	dae::Minigin engine("../Data/");
-	engine.Run(load);
+	engine.Run(dae::load);
 	return 0;
 }

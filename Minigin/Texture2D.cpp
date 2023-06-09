@@ -3,22 +3,32 @@
 
 dae::Texture2D::~Texture2D()
 {
-	SDL_DestroyTexture(m_texture);
+	SDL_DestroyTexture(m_pTexture);
 }
 
 glm::ivec2 dae::Texture2D::GetSize() const
 {
 	SDL_Rect dst;
 	SDL_QueryTexture(GetSDLTexture(), nullptr, nullptr, &dst.w, &dst.h);
-	return { dst.w,dst.h };
+	return { dst.w, dst.h };
+}
+
+int dae::Texture2D::GetWidth() const
+{
+	return GetSize().x;
+}
+
+int dae::Texture2D::GetHeight() const
+{
+	return GetSize().y;
 }
 
 SDL_Texture* dae::Texture2D::GetSDLTexture() const
 {
-	return m_texture;
+	return m_pTexture;
 }
 
-dae::Texture2D::Texture2D(SDL_Texture* texture)
+dae::Texture2D::Texture2D(SDL_Texture* pTexture)
 {
-	m_texture = texture;
+	m_pTexture = pTexture;
 }

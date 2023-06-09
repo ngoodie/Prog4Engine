@@ -10,13 +10,14 @@ class dae::InputManager::KeyboardImpl
 public:
 	~KeyboardImpl()
 	{
-		/*
 		for (auto& pair : m_KeyboardCommands)
 		{
-			delete pair.second;
-			pair.second = nullptr;
+			for (auto& pair2 : pair.second)
+			{
+				delete pair2.second;
+				pair2.second = nullptr;
+			}
 		}
-		*/
 	}
 
 	void AddKeyboardCommand(unsigned int sceneId, unsigned int keyboardButton, PressType pressType, Command* pCommand)
@@ -139,18 +140,19 @@ public:
 		return true;
 	}
 
-	~ControllersImpl() // move ownership of commands to scene
+	~ControllersImpl()
 	{
-		/*
 		for (int i = 0; i < m_NrMaxControllers; ++i)
 		{
 			for (auto& pair : m_ControllerCommands[i])
 			{
-				delete pair.second;
-				pair.second = nullptr;
+				for (auto& pair2 : pair.second)
+				{
+					delete pair2.second;
+					pair2.second = nullptr;
+				}
 			}
 		}
-		*/
 	}
 
 	bool IsButtonDown(int controllerId, WORD button)

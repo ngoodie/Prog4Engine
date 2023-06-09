@@ -14,6 +14,7 @@ dae::RotatorComponent::RotatorComponent(float radius, float speed, bool clockWis
 	}
 	else
 	{
+		m_CurrentAngle = 3.14159f;
 		m_Direction = -1.f;
 	}
 }

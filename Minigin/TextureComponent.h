@@ -20,6 +20,6 @@ namespace dae
 		TextureComponent& operator=(TextureComponent&& other) = delete;
 
 	private:
-		std::shared_ptr<Texture2D> m_texture{};
+		std::shared_ptr<Texture2D> m_pTexture{};
 	};
 }

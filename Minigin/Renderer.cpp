@@ -31,6 +31,7 @@ void dae::Renderer::Render() const
 {
 	const auto& color = GetBackgroundColor();
 	SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);
+	//SDL_RenderSetLogicalSize(m_renderer, 256, 224);
 	SDL_RenderClear(m_renderer);
 
 	SceneManager::GetInstance().Render();
@@ -54,6 +55,22 @@ void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const
 	dst.y = static_cast<int>(y);
 	SDL_QueryTexture(texture.GetSDLTexture(), nullptr, nullptr, &dst.w, &dst.h);
 	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), nullptr, &dst);
+}
+
+void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const float y, const int width, const int height, const int srcX, const int srcY) const
+{
+	SDL_Rect src{};
+	src.x = srcX;
+	src.y = srcY;
+	src.w = width;
+	src.h = height;
+
+	SDL_Rect dst{};
+	dst.x = static_cast<int>(x);
+	dst.y = static_cast<int>(y);
+	dst.w = width;
+	dst.h = height;
+	SDL_RenderCopy(GetSDLRenderer(), texture.GetSDLTexture(), &src, &dst);
 }
 
 void dae::Renderer::RenderTexture(const Texture2D& texture, const float x, const float y, const float width, const float height) const

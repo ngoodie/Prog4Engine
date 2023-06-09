@@ -6,13 +6,13 @@
 
 dae::TextureComponent::TextureComponent(const std::string& filename)
 {
-	m_texture = ResourceManager::GetInstance().LoadTexture(filename);
+	m_pTexture = ResourceManager::GetInstance().LoadTexture(filename);
 }
 
 void dae::TextureComponent::Render() const
 {
 	const auto& pos = GetGameObject()->GetWorldPosition();
-	Renderer::GetInstance().RenderTexture(*m_texture, pos.x, pos.y);
+	Renderer::GetInstance().RenderTexture(*m_pTexture, pos.x, pos.y);
 }
 
 dae::TextureComponent::~TextureComponent()

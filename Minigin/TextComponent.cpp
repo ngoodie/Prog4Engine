@@ -7,16 +7,66 @@
 #include "Font.h"
 #include "Texture2D.h"
 
-dae::TextComponent::TextComponent(const std::string& text, std::shared_ptr<Font> font)
-	: m_needsUpdate(true), m_text(text), m_font(std::move(font)), m_textTexture(nullptr)
-{ }
-
-void dae::TextComponent::Update([[maybe_unused]] float deltaTime)
+dae::TextComponent::TextComponent(const std::string& text, std::shared_ptr<Font> font, uint8_t r, uint8_t g, uint8_t b)
+	: m_NeedsUpdate(true)
+	, m_Text(text)
+	, m_pFont(std::move(font))
+	, m_pTextTexture(nullptr)
+	, m_R{ r }
+	, m_G{ g }
+	, m_B{ b }
 {
-	if (m_needsUpdate)
+	Update(0);
+}
+
+int dae::TextComponent::GetWidth() const
+{
+	return m_pTextTexture->GetWidth();
+}
+
+int dae::TextComponent::GetHeight() const
+{
+	return m_pTextTexture->GetSize().y;
+}
+
+void dae::TextComponent::SetColorOverTime(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2, float duration)
+{
+	m_R1 = r1;
+	m_G1 = g1;
+	m_B1 = b1;
+	
+	m_R2 = r2;
+	m_G2 = g2;
+	m_B2 = b2;
+
+	m_SetColorOverTime = true;
+
+	m_ColorTimer = 0;
+	m_ColorTimerDuration = duration;
+}
+
+void dae::TextComponent::Update(float deltaTime)
+{
+	if (m_NeedsUpdate || m_SetColorOverTime)
 	{
-		const SDL_Color color = { 255,255,255 }; // only white text is supported now
-		const auto surf = TTF_RenderText_Blended(m_font->GetFont(), m_text.c_str(), color);
+		if (m_SetColorOverTime)
+		{
+			m_ColorTimer += deltaTime;
+			if (m_ColorTimer >= m_ColorTimerDuration)
+			{
+				m_ColorTimer = m_ColorTimerDuration;
+				m_SetColorOverTime = false;
+			}
+
+			float t{ m_ColorTimer / m_ColorTimerDuration };
+			m_R = static_cast<uint8_t>(m_R1 + t * (m_R2 - m_R1));
+			m_G = static_cast<uint8_t>(m_G1 + t * (m_G2 - m_G1));
+			m_B = static_cast<uint8_t>(m_B1 + t * (m_B2 - m_B1));
+		}
+
+		SDL_Color color = { m_R, m_G, m_B };
+		
+		const auto surf = TTF_RenderText_Blended(m_pFont->GetFont(), m_Text.c_str(), color);
 		if (surf == nullptr)
 		{
 			throw std::runtime_error(std::string("Render text failed: ") + SDL_GetError());
@@ -27,8 +77,8 @@ void dae::TextComponent::Update([[maybe_unused]] float deltaTime)
 			throw std::runtime_error(std::string("Create text texture from surface failed: ") + SDL_GetError());
 		}
 		SDL_FreeSurface(surf);
-		m_textTexture = std::make_shared<Texture2D>(texture);
-		m_needsUpdate = false;
+		m_pTextTexture = std::make_shared<Texture2D>(texture);
+		m_NeedsUpdate = false;
 	}
 }
 
@@ -39,16 +89,16 @@ void dae::TextComponent::FixedUpdate([[maybe_unused]] float deltaTime)
 
 void dae::TextComponent::Render() const
 {
-	if (m_textTexture != nullptr)
+	if (m_pTextTexture != nullptr)
 	{
 		const auto& pos = GetGameObject()->GetPosition();
-		Renderer::GetInstance().RenderTexture(*m_textTexture, pos.x, pos.y);
+		Renderer::GetInstance().RenderTexture(*m_pTextTexture, pos.x, pos.y);
 	}
 }
 
 // This implementation uses the "dirty flag" pattern
 void dae::TextComponent::SetText(const std::string& text)
 {
-	m_text = text;
-	m_needsUpdate = true;
+	m_Text = text;
+	m_NeedsUpdate = true;
 }
