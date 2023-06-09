@@ -195,6 +195,7 @@
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="ISoundSystem.h" />
     <ClInclude Include="Minigin.h" />
+    <ClInclude Include="NullSoundSystem.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Scene.h" />
@@ -202,6 +203,7 @@
     <ClInclude Include="SDLSoundSystem.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="ServiceLocator.h" />
+    <ClInclude Include="SoundCommand.h" />
     <ClInclude Include="TextComponent.h" />
     <ClInclude Include="Texture2D.h" />
     <ClInclude Include="TextureComponent.h" />
@@ -215,12 +217,14 @@
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="ISoundSystem.cpp" />
     <ClCompile Include="Minigin.cpp" />
+    <ClCompile Include="NullSoundSystem.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SDLSoundSystem.cpp" />
     <ClCompile Include="ServiceLocator.cpp" />
+    <ClCompile Include="SoundCommand.cpp" />
     <ClCompile Include="TextComponent.cpp" />
     <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="TextureComponent.cpp" />

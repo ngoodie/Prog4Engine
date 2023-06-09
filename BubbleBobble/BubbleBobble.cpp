@@ -25,6 +25,8 @@
 #include "ServiceLocator.h"
 #include "SDLSoundSystem.h"
 
+#include "SoundCommand.h"
+
 //using namespace dae;
 
 namespace dae
@@ -93,10 +95,16 @@ namespace dae
 
 		auto& soundSystem = ServiceLocator::GetSoundSystem();
 		soundSystem.RegisterSound(0, "../Data/test.wav");
-		soundSystem.Play(0, 100);
+		soundSystem.RegisterSound(1, "../Data/test2.wav");
 
 		auto arcadeFont = ResourceManager::GetInstance().LoadFont("Emulogic.ttf", 16);
 		auto& pIntroScene = SceneManager::GetInstance().CreateScene("Intro");
+
+		Command* pSoundCommand = new SoundCommand(soundSystem, 0, 1.f);
+		input.AddControllerCommand(pIntroScene.GetId(), 0, ControllerButton::ButtonB, PressType::DOWN, pSoundCommand);
+
+		pSoundCommand = new SoundCommand(soundSystem, 1, 1.f);
+		input.AddControllerCommand(pIntroScene.GetId(), 0, ControllerButton::ButtonB, PressType::UP, pSoundCommand);
 
 		auto pBackgroundStars = std::make_shared<GameObject>();
 		auto pStarsAnimTexComp = pBackgroundStars->AddComponent(new AnimatedTextureComponent("stars_animated.png", static_cast<int>(screenWidth), static_cast<int>(screenHeight), 2, 2));

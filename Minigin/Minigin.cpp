@@ -53,7 +53,7 @@ dae::Minigin::Minigin(const std::string &dataPath)
 	}
 
 	g_window = SDL_CreateWindow(
-		"Programming 4 assignment",
+		"Prog4Exam - BubbleBobble - 2DAE08 Yomtov Nir",
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
 		256 * 2,
