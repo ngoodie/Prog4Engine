@@ -19,9 +19,11 @@
 #include "FPSComponent.h"
 #include "RotatorComponent.h"
 #include "BubblesGeneratorComponent.h"
-//#include "TranslateComponent.h"
 
 #include "InputManager.h"
+
+#include "ServiceLocator.h"
+#include "SDLSoundSystem.h"
 
 //using namespace dae;
 
@@ -88,6 +90,11 @@ namespace dae
 		input.AddKeyboardCommand(pDemoScene.GetId(), SDL_SCANCODE_A, PressType::DOWN, pTestCommand);
 		
 		// Scene #2
+
+		auto& soundSystem = ServiceLocator::GetSoundSystem();
+		soundSystem.RegisterSound(0, "../Data/test.wav");
+		soundSystem.Play(0, 100);
+
 		auto arcadeFont = ResourceManager::GetInstance().LoadFont("Emulogic.ttf", 16);
 		auto& pIntroScene = SceneManager::GetInstance().CreateScene("Intro");
 
@@ -161,6 +168,8 @@ namespace dae
 
 int main(int, char* [])
 {
+	ServiceLocator::RegisterSoundSystem(std::make_unique<SDLSoundSystem>());
+
 	dae::Minigin engine("../Data/");
 	engine.Run(dae::load);
 	return 0;
