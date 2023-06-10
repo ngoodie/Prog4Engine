@@ -13,6 +13,9 @@ namespace dae
 		void Render() const override;
 
 		void SetText(const std::string& text);
+		void SetSecondaryText(const std::string& text);
+
+		void RecenterOnDraw(bool recenter, float screenWidth = -1);
 
 		TextComponent(const std::string& text, std::shared_ptr<Font> font, uint8_t r, uint8_t b, uint8_t g);
 		virtual ~TextComponent() = default;
@@ -24,11 +27,12 @@ namespace dae
 		int GetWidth() const;
 		int GetHeight() const;
 
-		void SetColorOverTime(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2, float duration);
+		void SetColorOverTime(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2, float duration, int updatesPerSec = 0, bool loop = false);
 
 	private:
 		bool m_NeedsUpdate;
 		std::string m_Text;
+		std::string m_Text2;
 		std::shared_ptr<Font> m_pFont;
 		std::shared_ptr<Texture2D> m_pTextTexture;
 
@@ -45,7 +49,17 @@ namespace dae
 		uint8_t m_B2;
 
 		bool m_SetColorOverTime{ false };
+		bool m_Loop{ false };
+
 		float m_ColorTimer{ 0 };
 		float m_ColorTimerDuration{ 0 };
+
+		float m_UpdateTimer{ 0 };
+		float m_UpdatesPerSec{ 0 };
+
+		bool m_LoopDirection{ false };
+
+		bool m_RecenterOnDraw{ false };
+		float m_ScreenWidth{ -1 };
 	};
 }

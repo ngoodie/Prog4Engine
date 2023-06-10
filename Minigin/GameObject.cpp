@@ -14,6 +14,9 @@ dae::GameObject::~GameObject()
 
 void dae::GameObject::Update(float deltaTime)
 {
+	if (!m_IsActive)
+		return;
+	
 	for (auto& pComp : m_pComponents)
 	{
 		pComp->Update(deltaTime);
@@ -27,6 +30,9 @@ void dae::GameObject::Update(float deltaTime)
 
 void dae::GameObject::FixedUpdate(float deltaTime)
 {
+	if (!m_IsActive)
+		return;
+
 	for (auto& pComp : m_pComponents)
 	{
 		pComp->FixedUpdate(deltaTime);
@@ -40,6 +46,9 @@ void dae::GameObject::FixedUpdate(float deltaTime)
 
 void dae::GameObject::Render() const
 {
+	if (!m_IsActive)
+		return;
+
 	for (auto& pComp : m_pComponents)
 	{
 		pComp->Render();

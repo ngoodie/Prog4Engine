@@ -50,7 +50,42 @@ SDLSoundSystem::~SDLSoundSystem()
         sound.second.second = nullptr;
     }
 
+    for (auto& music : m_Music)
+    {
+        Mix_FreeMusic(music.second.second);
+        music.second.second = nullptr;
+    }
+
     Mix_CloseAudio();
+}
+
+void SDLSoundSystem::RegisterMusic(const Sound_Id musicId, const std::string& filepath)
+{
+    m_Music[musicId].second = Mix_LoadMUS(filepath.c_str());
+    if (m_Music[musicId].second == nullptr)
+    {
+        std::cerr << "Error loading music: " << Mix_GetError() << std::endl;
+    }
+}
+
+void SDLSoundSystem::PlayMusic(const Sound_Id musicId, const float volume, const int loops)
+{
+    if (m_Music.count(musicId) == 0)
+    {
+        std::cerr << "Music with ID " << musicId << " not registered." << std::endl;
+        return;
+    }
+
+    if (Mix_PlayingMusic() == 1)
+    {
+        Mix_HaltMusic();
+    }
+    volume;
+    if (Mix_PlayMusic(m_Music[musicId].second, loops) == -1)
+    {
+        std::cerr << "Error playing music: " << Mix_GetError() << std::endl;
+        return;
+    }
 }
 
 void SDLSoundSystem::Play(const Sound_Id soundId, const float volume)
@@ -75,6 +110,7 @@ void SDLSoundSystem::Play(const Sound_Id soundId, const float volume)
     }
     else // Play sound
     {
+        std::lock_guard<std::mutex> playLock(m_PlayMutex);
         //std::cout << "play\n";
         Mix_VolumeChunk(m_Sounds[soundId].second, int(MIX_MAX_VOLUME * volume));
         if (Mix_PlayChannel(-1, m_Sounds[soundId].second, 0) == -1)

@@ -31,6 +31,9 @@ namespace dae
 
 		void SetDirty(bool isDirty);
 
+		void SetActive(bool isActive) { m_IsActive = isActive; }
+		bool IsActive() { return m_IsActive; }
+
 		void SetPosition(float x, float y);
 		glm::vec3 GetPosition() const;
 		glm::vec3 GetWorldPosition();
@@ -43,6 +46,8 @@ namespace dae
 		GameObject& operator=(GameObject&& other) = delete;
 
 	private:
+		bool m_IsActive{ true };
+
 		Transform m_Transform{};
 		std::vector<Component*> m_pComponents;
 

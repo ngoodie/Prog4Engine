@@ -1,10 +1,10 @@
 #pragma once
 #include <iostream>
 
-class GameObject;
-
 namespace dae
 {
+	class GameObject;
+
 	class Command
 	{
 	public:

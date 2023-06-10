@@ -44,8 +44,6 @@ void PrintSDLVersion()
 dae::Minigin::Minigin(const std::string &dataPath)
 {
 	PrintSDLVersion();
-	
-	//(SDL_Init(SDL_INIT_AUDIO) != 0)
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) 
 	{

@@ -66,7 +66,7 @@ void dae::AnimatedTextureComponent::Update(float deltaTime)
 				}
 			}
 
-			m_AnimationTimer = m_SpritesPerSecond;
+			m_AnimationTimer += m_SpritesPerSecond;
 		}
 	}
 }

@@ -1,12 +1,15 @@
 #include "SceneManager.h"
 #include "Scene.h"
 
-bool dae::SceneManager::SetScene(const std::string& name)
+bool dae::SceneManager::SetScene(const std::string& name, bool restart)
 {
 	for (const auto& pScene : m_pScenes)
 	{
 		if (pScene->GetName() == name)
 		{
+			if (restart)
+				pScene->Restart();
+
 			m_ActiveSceneId = pScene->GetId();
 			return true;
 		}

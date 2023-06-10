@@ -154,12 +154,14 @@
     <ClCompile Include="BubbleBobble.cpp" />
     <ClCompile Include="BubblesGeneratorComponent.cpp" />
     <ClCompile Include="FPSComponent.cpp" />
+    <ClCompile Include="GameCommands.cpp" />
     <ClCompile Include="RotatorComponent.cpp" />
     <ClCompile Include="TranslateComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BubblesGeneratorComponent.h" />
     <ClInclude Include="FPSComponent.h" />
+    <ClInclude Include="GameCommands.h" />
     <ClInclude Include="RotatorComponent.h" />
     <ClInclude Include="TranslateComponent.h" />
   </ItemGroup>
