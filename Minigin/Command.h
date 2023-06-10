@@ -18,13 +18,4 @@ namespace dae
 		GameObject* m_pGameObject{ nullptr };
 
 	};
-
-	class TestCommand final : public Command
-	{
-	public:
-		TestCommand(GameObject* pGameObject) : Command(pGameObject) {};
-		~TestCommand() override = default;
-
-		void Execute() override { std::cout << "test command\n"; }
-	};
 }

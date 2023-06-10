@@ -9,6 +9,8 @@ namespace dae
 		BubblesGeneratorComponent(float bubblesPerSecond, float rotationSpeed, float bubblesSpeed, int amount);
 		~BubblesGeneratorComponent();
 
+		void Restart();
+
 		void Update(float deltaTime) override;
 		void FixedUpdate(float deltaTime) override;
 		void Render() const override {};

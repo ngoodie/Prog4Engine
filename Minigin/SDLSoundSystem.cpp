@@ -17,6 +17,9 @@ void SDLSoundSystem::LoadingThread()
         std::unique_lock<std::mutex> lock(m_LoadQueueMutex);
         m_LoadConditionVariable.wait(lock, [this] { return !m_IsRunning || !m_LoadQueue.empty() || !m_BackupQueue.empty(); });
 
+        if (!m_IsRunning)
+            break;
+
         // if the load queue is empty AND backup queue isn't
         if (m_LoadQueue.empty() && !m_BackupQueue.empty())
         {
@@ -42,6 +45,7 @@ void SDLSoundSystem::LoadingThread()
 SDLSoundSystem::~SDLSoundSystem()
 {
     m_IsRunning = false;
+    m_LoadConditionVariable.notify_one();
     m_Thread.join();
 
     for (auto& sound : m_Sounds)

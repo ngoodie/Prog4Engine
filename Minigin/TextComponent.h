@@ -27,6 +27,7 @@ namespace dae
 		int GetWidth() const;
 		int GetHeight() const;
 
+		void SetColor(uint8_t r, uint8_t g, uint8_t b) { m_R = r; m_G = g; m_B = b; m_NeedsUpdate = true; }
 		void SetColorOverTime(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2, float duration, int updatesPerSec = 0, bool loop = false);
 
 	private:

@@ -44,6 +44,24 @@ void dae::GameObject::FixedUpdate(float deltaTime)
 	}
 }
 
+void dae::GameObject::LateUpdate(float)
+{
+	if (m_RemoveAllChildren)
+	{
+		for (auto pChild : m_pChildren)
+		{
+			RemoveChild(pChild.get());
+		}
+		m_RemoveAllChildren = false;
+	}
+
+}
+
+void dae::GameObject::RemoveAllChildren()
+{
+	m_RemoveAllChildren = true;
+}
+
 void dae::GameObject::Render() const
 {
 	if (!m_IsActive)
@@ -74,18 +92,10 @@ void dae::GameObject::SetParent(GameObject* pParent)
 void dae::GameObject::AddChild(std::shared_ptr<GameObject> pChild)
 {
 	pChild->SetParent(this);
+	pChild->SetActive(m_IsActive);
 
 	m_pChildren.emplace_back(std::move(pChild));
 }
-
-/*
-void dae::GameObject::AddChild(GameObject* pChild)
-{
-	pChild->SetParent(this);
-
-	m_pChildren.push_back(pChild);
-}
-*/
 
 bool dae::GameObject::RemoveChild(GameObject* pChild)
 {
@@ -95,9 +105,8 @@ bool dae::GameObject::RemoveChild(GameObject* pChild)
 
 	if (it != m_pChildren.end())
 	{
-		pChild->SetParent(nullptr);
+		//pChild->SetParent(nullptr);
 		m_pChildren.erase(it);
-
 		return true;
 	}
 

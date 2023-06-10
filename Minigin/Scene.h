@@ -16,6 +16,7 @@ namespace dae
 
 		void Update(float deltaTime);
 		void FixedUpdate(float deltaTime);
+		void LateUpdate(float deltaTime);
 		void Render() const;
 
 		unsigned int GetId() const { return m_Id; }

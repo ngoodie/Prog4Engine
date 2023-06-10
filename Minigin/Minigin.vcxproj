@@ -196,6 +196,7 @@
     <ClInclude Include="ISoundSystem.h" />
     <ClInclude Include="Minigin.h" />
     <ClInclude Include="NullSoundSystem.h" />
+    <ClInclude Include="IObserver.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Scene.h" />
@@ -212,12 +213,14 @@
   <ItemGroup>
     <ClCompile Include="AnimatedTextureComponent.cpp" />
     <ClCompile Include="Command.cpp" />
+    <ClCompile Include="Component.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="ISoundSystem.cpp" />
     <ClCompile Include="Minigin.cpp" />
     <ClCompile Include="NullSoundSystem.cpp" />
+    <ClCompile Include="IObserver.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Scene.cpp" />

@@ -14,6 +14,7 @@
 #include "TextureComponent.h"
 #include "AnimatedTextureComponent.h"
 #include "TextComponent.h"
+#include "MainMenuComponent.h"
 #include "Scene.h"
 
 #include "FPSComponent.h"
@@ -38,10 +39,17 @@ namespace dae
 		float screenHeight = 224 * 2;
 
 		auto& soundSystem = ServiceLocator::GetSoundSystem();
-		soundSystem.RegisterSound(0, "../Data/opening_sfx.wav");
-		soundSystem.RegisterSound(1, "../Data/insert_coin.wav");
-		soundSystem.RegisterMusic(0, "../Data/music_test.wav");
-		//soundSystem.PlayMusic(0, 1.f, -1);
+		soundSystem.RegisterSound(0, "../Data/Sfx/opening.wav");
+		soundSystem.RegisterSound(1, "../Data/Sfx/bublbobl-051_insert_coin.wav");
+
+		soundSystem.RegisterMusic(0, "../Data/Music/intro_music.mp3");
+		soundSystem.RegisterMusic(1, "../Data/Music/main_theme.mp3");
+		soundSystem.RegisterMusic(2, "../Data/Music/main_theme_hurry.mp3");
+		soundSystem.RegisterMusic(3, "../Data/Music/game_over.mp3");
+		soundSystem.RegisterMusic(4, "../Data/Music/highscore_screen.mp3");
+		soundSystem.RegisterMusic(5, "../Data/Music/super_drunk.mp3");
+		//soundSystem.PlayMusic(0, 1.f, 1);
+		//soundSystem.PlayMusic(1, 1.f, -1);
 
 		auto& input = InputManager::GetInstance();
 		auto arcadeFont = ResourceManager::GetInstance().LoadFont("Emulogic.ttf", 16);
@@ -168,15 +176,71 @@ namespace dae
 		p2ScoreGo->SetPosition(screenWidth - 88 - p2ScoreTextComp->GetWidth() / 2.f, 12.f);
 		pMainMenuScene.Add(p2ScoreGo);
 
+		// GameMode Selection Menu
+		auto pGameModesContainerGo = std::make_shared<GameObject>();
+		pMainMenuScene.Add(pGameModesContainerGo);
+
+		pGameModesContainerGo->SetActive(false);
+
+		// Select GameMode Title
+		auto pGameModeTitleGo = std::make_shared<GameObject>();
+
+		auto pGameModeTitleTextComp = pGameModeTitleGo->AddComponent(new TextComponent("- SELECT GAMEMODE -", arcadeFont, 255, 255, 255));
+		pGameModeTitleGo->SetPosition(screenWidth / 2.f - pGameModeTitleTextComp->GetWidth() / 2.f, 92.f);
+		pGameModesContainerGo->AddChild(pGameModeTitleGo);
+
+		// 1 Player
+		auto pSinglePlayerGo = std::make_shared<GameObject>();
+		auto pSinglePlayerTextComp = pSinglePlayerGo->AddComponent(new TextComponent("1 PLAYER", arcadeFont, 255, 255, 255));
+		pSinglePlayerGo->SetPosition(screenWidth / 2.f - pSinglePlayerTextComp->GetWidth() / 2.f, 156.f);
+		pGameModesContainerGo->AddChild(pSinglePlayerGo);
+
+		// 2 Player Co-Op
+		auto pCoopGo = std::make_shared<GameObject>();
+		auto pCoopTextComp = pCoopGo->AddComponent(new TextComponent("CO-OP", arcadeFont, 128, 128, 128));
+		pCoopGo->SetPosition(screenWidth / 2.f - pCoopTextComp->GetWidth() / 2.f, 188.f);
+		pGameModesContainerGo->AddChild(pCoopGo);
+
+		// 2 Player Versus
+		auto pVersusGo = std::make_shared<GameObject>();
+		auto pVersusTextComp = pVersusGo->AddComponent(new TextComponent("VERSUS", arcadeFont, 128, 128, 128));
+		pVersusGo->SetPosition(screenWidth / 2.f - pVersusTextComp->GetWidth() / 2.f, 220.f);
+		pGameModesContainerGo->AddChild(pVersusGo);
+
+		// Selection Arrow
+		auto pSelectionArrowGo = std::make_shared<GameObject>();
+		auto pSelectionArrowTexComp = pSelectionArrowGo->AddComponent(new AnimatedTextureComponent("selection_arrow.png", 16, 16, 2, 1));
+		pSelectionArrowGo->SetPosition(pSinglePlayerGo->GetWorldPosition().x - 24.f, pSinglePlayerGo->GetWorldPosition().y + 2);
+		pSelectionArrowTexComp->SetSpritesPerSecond(2);
+		pSelectionArrowTexComp->Play(0, 1, false);
+		pGameModesContainerGo->AddChild(pSelectionArrowGo);
+		
+		// MainMenuGo
+		auto pMainMenuGo = std::make_shared<GameObject>();
+		auto pMainMenuComp = pMainMenuGo->AddComponent(new MainMenuComponent(pLogoGo.get(), pGameModesContainerGo.get(), pSinglePlayerGo.get(), pCoopGo.get(), pVersusGo.get(), pSelectionArrowGo.get()));
+		pMainMenuScene.Add(pMainMenuGo);
+
 		// Commands
-		Command* pSkipLogoCommand = new MM_SkipLogoCommand(pLogoGo.get(), soundSystem, 0, 1.f);
-		input.AddControllerCommand(pMainMenuScene.GetId(), 0, ControllerButton::Start, PressType::DOWN, pSkipLogoCommand);
+		Command* pMainMenuConfirmCommand = new MM_Confirm(pMainMenuGo.get(), soundSystem, 0, 1.f);
+		input.AddControllerCommand(pMainMenuScene.GetId(), 0, ControllerButton::Start, PressType::DOWN, pMainMenuConfirmCommand);
+		pMainMenuConfirmCommand = new MM_Confirm(pMainMenuGo.get(), soundSystem, 0, 1.f);
+		input.AddControllerCommand(pMainMenuScene.GetId(), 0, ControllerButton::ButtonA, PressType::DOWN, pMainMenuConfirmCommand);
+
+		Command* pMainMenuUpCommand = new MM_Select(pMainMenuGo.get(), -1);
+		input.AddControllerCommand(pMainMenuScene.GetId(), 0, ControllerButton::DPadUp, PressType::DOWN, pMainMenuUpCommand);
+
+		Command* pMainMenuDownCommand = new MM_Select(pMainMenuGo.get(), 1);
+		input.AddControllerCommand(pMainMenuScene.GetId(), 0, ControllerButton::DPadDown, PressType::DOWN, pMainMenuDownCommand);
+
+		Command* pMainMenuBackCommand = new MM_Back(pMainMenuGo.get());
+		input.AddControllerCommand(pMainMenuScene.GetId(), 0, ControllerButton::Back, PressType::DOWN, pMainMenuBackCommand);
 
 		// Restart Function
-		auto RestartMainMenu = [&soundSystem, pLogoGo]()
+		auto RestartMainMenu = [&soundSystem, pMainMenuComp]()
 		{
 			soundSystem.Play(0, 1.f);
-			pLogoGo->SetActive(true);
+			pMainMenuComp->SetState(MainMenuState::LOGO);
+			pMainMenuComp->SetSelection(0);
 			std::cout << "restarted main menu\n";
 		};
 		pMainMenuScene.SetRestartFunction(RestartMainMenu);
@@ -192,33 +256,33 @@ namespace dae
 
 		auto pBackgroundStars = std::make_shared<GameObject>();
 		auto pStarsAnimTexComp = pBackgroundStars->AddComponent(new AnimatedTextureComponent("stars_animated.png", static_cast<int>(screenWidth), static_cast<int>(screenHeight), 2, 2));
-		pStarsAnimTexComp->SetSpritesPerSecond(3);
+		pStarsAnimTexComp->SetSpritesPerSecond(2);
 		pStarsAnimTexComp->Play(0, 3, false, true);
 		pIntroScene.Add(pBackgroundStars);
 
 		// Text
 		auto pTextGo = std::make_shared<GameObject>();
-		auto pTextComp = pTextGo->AddComponent(new TextComponent("NOW,IT IS BEGINNING OF A", arcadeFont, 0, 0, 0));
-		pTextComp->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
-		pTextGo->SetPosition(screenWidth / 2.f - pTextComp->GetWidth() / 2.f, 28);
+		auto pTextComp0 = pTextGo->AddComponent(new TextComponent("NOW,IT IS BEGINNING OF A", arcadeFont, 0, 0, 0));
+		pTextComp0->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
+		pTextGo->SetPosition(screenWidth / 2.f - pTextComp0->GetWidth() / 2.f, 28);
 		pIntroScene.Add(pTextGo);
 
 		pTextGo = std::make_shared<GameObject>();
-		pTextComp = pTextGo->AddComponent(new TextComponent("FANTASTIC STORY!! LET'S MAKE A", arcadeFont, 255, 0, 0));
-		pTextComp->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
-		pTextGo->SetPosition(screenWidth / 2.f - pTextComp->GetWidth() / 2.f, 60);
+		auto pTextComp1 = pTextGo->AddComponent(new TextComponent("FANTASTIC STORY!! LET'S MAKE A", arcadeFont, 255, 0, 0));
+		pTextComp1->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
+		pTextGo->SetPosition(screenWidth / 2.f - pTextComp1->GetWidth() / 2.f, 60);
 		pIntroScene.Add(pTextGo);
 
 		pTextGo = std::make_shared<GameObject>();
-		pTextComp = pTextGo->AddComponent(new TextComponent("JOURNEY TO THE CAVE OF MONSTERS!", arcadeFont, 255, 0, 0));
-		pTextComp->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
-		pTextGo->SetPosition(screenWidth / 2.f - pTextComp->GetWidth() / 2.f, 92);
+		auto pTextComp2 = pTextGo->AddComponent(new TextComponent("JOURNEY TO THE CAVE OF MONSTERS!", arcadeFont, 255, 0, 0));
+		pTextComp2->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
+		pTextGo->SetPosition(screenWidth / 2.f - pTextComp2->GetWidth() / 2.f, 92);
 		pIntroScene.Add(pTextGo);
 
 		pTextGo = std::make_shared<GameObject>();
-		pTextComp = pTextGo->AddComponent(new TextComponent("GOOD LUCK!", arcadeFont, 255, 0, 0));
-		pTextComp->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
-		pTextGo->SetPosition(screenWidth / 2.f - pTextComp->GetWidth() / 2.f, 124);
+		auto pTextComp3 = pTextGo->AddComponent(new TextComponent("GOOD LUCK!", arcadeFont, 255, 0, 0));
+		pTextComp3->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
+		pTextGo->SetPosition(screenWidth / 2.f - pTextComp3->GetWidth() / 2.f, 124);
 		pIntroScene.Add(pTextGo);
 
 		// Rotating players
@@ -246,13 +310,26 @@ namespace dae
 
 		// Bubbles
 		auto pBubblesGenerator = std::make_shared<GameObject>();
-		pBubblesGenerator->AddComponent(new BubblesGeneratorComponent(1 / 20.f, 17.5f, 200.f, 50));
+		auto pBubblesGeneratorComp = pBubblesGenerator->AddComponent(new BubblesGeneratorComponent(1 / 20.f, 17.5f, 200.f, 75));
 		pBubblesGenerator->SetPosition(screenWidth / 2, screenHeight / 2);
 		pIntroScene.Add(pBubblesGenerator);
 
 		// Commands
 		Command* pTestCommand2 = new TestCommand(pPlayerOne.get());
 		input.AddKeyboardCommand(pIntroScene.GetId(), SDL_SCANCODE_Y, PressType::DOWN, pTestCommand2);
+
+		// Restart Function
+		auto RestartIntro = [&soundSystem, pTextComp0, pTextComp1, pTextComp2, pTextComp3, pBubblesGeneratorComp]()
+		{
+			soundSystem.PlayMusic(0, 1.f, 1);
+			pTextComp0->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
+			pTextComp1->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
+			pTextComp2->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
+			pTextComp3->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
+			pBubblesGeneratorComp->Restart();
+			std::cout << "restarted intro\n";
+		};
+		pIntroScene.SetRestartFunction(RestartIntro);
 
 		SceneManager::GetInstance().SetScene("MainMenu", true);
 	}

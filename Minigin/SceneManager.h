@@ -15,6 +15,7 @@ namespace dae
 
 		void Update(float deltaTime);
 		void FixedUpdate(float deltaTime);
+		void LateUpdate(float deltaTime);
 		void Render();
 		unsigned int GetActiveSceneId() const { return m_ActiveSceneId; }
 

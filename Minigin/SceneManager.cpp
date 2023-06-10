@@ -44,6 +44,18 @@ void dae::SceneManager::FixedUpdate(float deltaTime)
 	}
 }
 
+void dae::SceneManager::LateUpdate(float deltaTime)
+{
+	for (auto& pScene : m_pScenes)
+	{
+		if (pScene->GetId() == m_ActiveSceneId)
+		{
+			pScene->LateUpdate(deltaTime);
+			break;
+		}
+	}
+}
+
 void dae::SceneManager::Render()
 {
 	for (auto& pScene : m_pScenes)

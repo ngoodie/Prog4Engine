@@ -44,6 +44,14 @@ namespace dae
 		}
 	}
 
+	void Scene::LateUpdate(float deltaTime)
+	{
+		for (auto& pGameObject : m_pGameObjects)
+		{
+			pGameObject->LateUpdate(deltaTime);
+		}
+	}
+
 	void Scene::Render() const
 	{
 		for (const auto& pGameObject : m_pGameObjects)

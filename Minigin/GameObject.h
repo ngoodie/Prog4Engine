@@ -13,6 +13,7 @@ namespace dae
 	public:
 		virtual void Update(float deltaTime);
 		virtual void FixedUpdate(float deltaTime);
+		virtual void LateUpdate(float deltaTime);
 		virtual void Render() const;
 
 		template <typename T>
@@ -30,8 +31,20 @@ namespace dae
 		bool RemoveChild(GameObject* pChild);
 
 		void SetDirty(bool isDirty);
+		void RemoveAllChildren();
 
-		void SetActive(bool isActive) { m_IsActive = isActive; }
+		void SetActive(bool isActive)
+		{
+			m_IsActive = isActive;
+
+			for (auto pChild : m_pChildren)
+			{
+				pChild->SetActive(isActive);
+			}
+		}
+
+		std::vector<std::shared_ptr<GameObject>>& GetChildren() { return m_pChildren; }
+
 		bool IsActive() { return m_IsActive; }
 
 		void SetPosition(float x, float y);
@@ -47,6 +60,7 @@ namespace dae
 
 	private:
 		bool m_IsActive{ true };
+		bool m_RemoveAllChildren{ false };
 
 		Transform m_Transform{};
 		std::vector<Component*> m_pComponents;

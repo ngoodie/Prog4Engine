@@ -1,4 +1,7 @@
 #pragma once
+#include <vector>
+#include "IObserver.h"
+
 namespace dae
 {
 	class GameObject;
@@ -24,11 +27,17 @@ namespace dae
 			}
 		};
 
+		void AddObserver(IObserver* pObserver);
+		void RemoveObserver(IObserver* pObserver);
+		void NotifyObservers(unsigned eventId);
+
 	protected:
 		GameObject* GetGameObject() const { return m_pGameObject; };
 
 	private:
 		GameObject* m_pGameObject = nullptr;
+		std::vector<IObserver*> m_pObservers{};
+
 		//TODO:
 		bool m_bMarkedForDeletion{ false };
 	};

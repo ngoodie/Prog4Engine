@@ -19,6 +19,15 @@ dae::BubblesGeneratorComponent::~BubblesGeneratorComponent()
 
 }
 
+void dae::BubblesGeneratorComponent::Restart()
+{
+	GetGameObject()->RemoveAllChildren();
+
+	m_CurrentAngle = 0;
+	m_Count = 0;
+	m_Timer = 0;
+}
+
 void dae::BubblesGeneratorComponent::Update(float deltaTime)
 {
 	if (m_Count < m_Amount)
