@@ -72,6 +72,14 @@ void SDLSoundSystem::RegisterMusic(const Sound_Id musicId, const std::string& fi
     }
 }
 
+void SDLSoundSystem::StopMusic()
+{
+    if (Mix_PlayingMusic() == 1)
+    {
+        Mix_HaltMusic();
+    }
+}
+
 void SDLSoundSystem::PlayMusic(const Sound_Id musicId, const float volume, const int loops)
 {
     if (m_Music.count(musicId) == 0)

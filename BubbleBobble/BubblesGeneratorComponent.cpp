@@ -53,7 +53,7 @@ void dae::BubblesGeneratorComponent::Update(float deltaTime)
 	}
 }
 
-void dae::BubblesGeneratorComponent::FixedUpdate([[maybe_unused]] float deltaTime)
+void dae::BubblesGeneratorComponent::FixedUpdate(float)
 {
 
 }

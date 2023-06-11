@@ -27,6 +27,8 @@ namespace dae
 			}
 		};
 
+		virtual void Initialize() {};
+
 		void AddObserver(IObserver* pObserver);
 		void RemoveObserver(IObserver* pObserver);
 		void NotifyObservers(unsigned eventId);

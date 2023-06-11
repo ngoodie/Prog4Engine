@@ -75,6 +75,7 @@ namespace dae
 	T* GameObject::AddComponent(T* pComp)
 	{
 		pComp->InitializeGameObject(this);
+		pComp->Initialize();
 		m_pComponents.push_back(pComp);
 
 		return pComp;

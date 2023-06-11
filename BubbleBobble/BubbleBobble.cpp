@@ -15,11 +15,13 @@
 #include "AnimatedTextureComponent.h"
 #include "TextComponent.h"
 #include "MainMenuComponent.h"
+#include "TimedSceneSwitchComponent.h"
 #include "Scene.h"
 
 #include "FPSComponent.h"
 #include "RotatorComponent.h"
 #include "BubblesGeneratorComponent.h"
+#include "LevelComponent.h"
 
 #include "InputManager.h"
 
@@ -109,7 +111,9 @@ namespace dae
 		input.AddKeyboardCommand(pDemoScene.GetId(), SDL_SCANCODE_A, PressType::DOWN, pTestCommand);
 		*/
 		
+		// **************
 		// MainMenu Scene
+		// **************
 		auto& pMainMenuScene = SceneManager::GetInstance().CreateScene("MainMenu");
 
 		// Game Logo
@@ -238,6 +242,7 @@ namespace dae
 		// Restart Function
 		auto RestartMainMenu = [&soundSystem, pMainMenuComp]()
 		{
+			soundSystem.StopMusic();
 			soundSystem.Play(0, 1.f);
 			pMainMenuComp->SetState(MainMenuState::LOGO);
 			pMainMenuComp->SetSelection(0);
@@ -245,7 +250,9 @@ namespace dae
 		};
 		pMainMenuScene.SetRestartFunction(RestartMainMenu);
 
+		// ***********
 		// Intro Scene
+		// ***********
 		auto& pIntroScene = SceneManager::GetInstance().CreateScene("Intro");
 
 		Command* pSoundCommand = new SoundCommand(soundSystem, 0, 1.f);
@@ -310,27 +317,76 @@ namespace dae
 
 		// Bubbles
 		auto pBubblesGenerator = std::make_shared<GameObject>();
-		auto pBubblesGeneratorComp = pBubblesGenerator->AddComponent(new BubblesGeneratorComponent(1 / 20.f, 17.5f, 200.f, 75));
+		auto pBubblesGeneratorComp = pBubblesGenerator->AddComponent(new BubblesGeneratorComponent(1 / 20.f, 17.5f, 200.f, 80));
 		pBubblesGenerator->SetPosition(screenWidth / 2, screenHeight / 2);
 		pIntroScene.Add(pBubblesGenerator);
+
+		// Next Scene Timer
+		auto pNextSceneGo = std::make_shared<GameObject>();
+		auto pTimedSceneSwitchComp = pNextSceneGo->AddComponent(new TimedSceneSwitchComponent(0.5f/*8.5f*/, "SinglePlayer", true));
+		pIntroScene.Add(pNextSceneGo);
 
 		// Commands
 		Command* pTestCommand2 = new TestCommand(pPlayerOne.get());
 		input.AddKeyboardCommand(pIntroScene.GetId(), SDL_SCANCODE_Y, PressType::DOWN, pTestCommand2);
 
 		// Restart Function
-		auto RestartIntro = [&soundSystem, pTextComp0, pTextComp1, pTextComp2, pTextComp3, pBubblesGeneratorComp]()
+		auto RestartIntro = [&soundSystem, pTextComp0, pTextComp1, pTextComp2, pTextComp3, pBubblesGeneratorComp, pTimedSceneSwitchComp]()
 		{
 			soundSystem.PlayMusic(0, 1.f, 1);
 			pTextComp0->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
 			pTextComp1->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
 			pTextComp2->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
 			pTextComp3->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
+			pTimedSceneSwitchComp->ResetTimer();
 			pBubblesGeneratorComp->Restart();
 			std::cout << "restarted intro\n";
 		};
 		pIntroScene.SetRestartFunction(RestartIntro);
 
+		// ******************
+		// SinglePlayer Scene
+		// ******************
+		auto& pSinglePlayerScene = SceneManager::GetInstance().CreateScene("SinglePlayer");
+
+		// UI Text
+		p1UpGo = std::make_shared<GameObject>();
+		p1UpTextComp = p1UpGo->AddComponent(new TextComponent("1UP", arcadeFont, 0, 255, 0));
+		p1UpGo->SetPosition(88 - p1UpTextComp->GetWidth() / 2.f, -4.f);
+		pSinglePlayerScene.Add(p1UpGo);
+
+		p1ScoreGo = std::make_shared<GameObject>();
+		p1ScoreTextComp = p1ScoreGo->AddComponent(new TextComponent("   00", arcadeFont, 255, 255, 255));
+		p1ScoreGo->SetPosition(88 - p1ScoreTextComp->GetWidth() / 2.f, 12.f);
+		pSinglePlayerScene.Add(p1ScoreGo);
+
+		pHighScoreTitleGo = std::make_shared<GameObject>();
+		pHighScoreTitleTextComp = pHighScoreTitleGo->AddComponent(new TextComponent("HIGH SCORE", arcadeFont, 255, 0, 0));
+		pHighScoreTitleGo->SetPosition(screenWidth / 2.f - pHighScoreTitleTextComp->GetWidth() / 2.f, -4.f);
+		pSinglePlayerScene.Add(pHighScoreTitleGo);
+
+		pHighScoreGo = std::make_shared<GameObject>();
+		pHighScoreTextComp = pHighScoreGo->AddComponent(new TextComponent(" 30000", arcadeFont, 255, 255, 255));
+		pHighScoreGo->SetPosition(screenWidth / 2.f - pHighScoreTextComp->GetWidth() / 2.f, 12.f);
+		pSinglePlayerScene.Add(pHighScoreGo);
+
+		// Level
+		auto pLevel1Go = std::make_shared<GameObject>();
+		auto pLevel1Comp = pLevel1Go->AddComponent(new LevelComponent("../Data/Levels/level1.txt"));
+		pSinglePlayerScene.Add(pLevel1Go);
+		pLevel1Comp;
+
+		// Restart Function
+		auto RestartSinglePlayer = [&soundSystem]()
+		{
+			soundSystem.PlayMusic(1, 1.f, -1);
+			std::cout << "restarted single player\n";
+		};
+		pSinglePlayerScene.SetRestartFunction(RestartSinglePlayer);
+
+		//*******************************
+		// Set Starting Scene to MainMenu
+		//*******************************
 		SceneManager::GetInstance().SetScene("MainMenu", true);
 	}
 }

@@ -155,16 +155,20 @@
     <ClCompile Include="BubblesGeneratorComponent.cpp" />
     <ClCompile Include="FPSComponent.cpp" />
     <ClCompile Include="GameCommands.cpp" />
+    <ClCompile Include="LevelComponent.cpp" />
     <ClCompile Include="MainMenuComponent.cpp" />
     <ClCompile Include="RotatorComponent.cpp" />
+    <ClCompile Include="TimedSceneSwitchComponent.cpp" />
     <ClCompile Include="TranslateComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BubblesGeneratorComponent.h" />
     <ClInclude Include="FPSComponent.h" />
     <ClInclude Include="GameCommands.h" />
+    <ClInclude Include="LevelComponent.h" />
     <ClInclude Include="MainMenuComponent.h" />
     <ClInclude Include="RotatorComponent.h" />
+    <ClInclude Include="TimedSceneSwitchComponent.h" />
     <ClInclude Include="TranslateComponent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

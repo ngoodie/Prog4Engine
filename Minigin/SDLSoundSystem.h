@@ -24,6 +24,8 @@ public:
 	void RegisterSound(const Sound_Id soundId, const std::string& filepath) override;
 	void RegisterMusic(const Sound_Id musicId, const std::string& filepath) override;
 
+	void StopMusic() override;
+
 private:
 	std::map<Sound_Id, std::pair<std::string, Mix_Chunk*>> m_Sounds;
 	std::map<Sound_Id, std::pair<std::string, _Mix_Music*>> m_Music;
