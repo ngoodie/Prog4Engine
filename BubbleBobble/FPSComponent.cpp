@@ -22,7 +22,7 @@ void dae::FPSComponent::Update(float deltaTime)
 	m_pTextComponent->SetText("FPS: " + std::to_string(int(1.0f / deltaTime)));
 }
 
-void dae::FPSComponent::FixedUpdate([[maybe_unused]] float deltaTime)
+void dae::FPSComponent::FixedUpdate(float)
 {
 
 }

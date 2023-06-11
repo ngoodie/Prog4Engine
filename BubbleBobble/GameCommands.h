@@ -4,6 +4,7 @@
 class ISoundSystem;
 namespace dae
 {
+	class PlayerComponent;
 	class MM_Confirm final : public Command
 	{
 	public:
@@ -56,5 +57,18 @@ namespace dae
 		~TestCommand() override = default;
 
 		void Execute() override;
+	};
+
+	class MovePlayerCommand final : public Command
+	{
+	public:
+		MovePlayerCommand(GameObject* pGameObject, float dirX, float dirY);
+		~MovePlayerCommand() override = default;
+
+		void Execute() override;
+	private:
+		PlayerComponent* m_pPlayerComponent;
+		float m_DirX;
+		float m_DirY;
 	};
 }

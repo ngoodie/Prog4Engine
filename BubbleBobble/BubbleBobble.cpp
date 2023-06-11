@@ -24,6 +24,8 @@
 #include "LevelComponent.h"
 #include "TimedSetActiveComponent.h"
 #include "PlayerComponent.h"
+#include "ColliderComponent.h"
+#include "RigidbodyComponent.h"
 
 #include "InputManager.h"
 
@@ -395,8 +397,19 @@ namespace dae
 
 		// Player
 		auto pPlayer = std::make_shared<GameObject>();
-		pPlayer->AddComponent(new PlayerComponent(48.f, screenHeight - 80.f));
+		auto pPlayerComp = pPlayer->AddComponent(new PlayerComponent(48.f, screenHeight - 80.f));
+		pPlayerComp->RegisterLevel(pLevel1Comp);
 		pSinglePlayerScene.Add(pPlayer);
+
+		// Commands
+		Command* pPlayerMoveLeft = new MovePlayerCommand(pPlayer.get(), -1.f, 0);
+		input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::DPadLeft, PressType::HELD, pPlayerMoveLeft);
+
+		Command* pPlayerMoveRight = new MovePlayerCommand(pPlayer.get(), 1.f, 0);
+		input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::DPadRight, PressType::HELD, pPlayerMoveRight);
+
+		Command* pPlayerMoveUp = new MovePlayerCommand(pPlayer.get(), 0, 1.f);
+		input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::ButtonB, PressType::DOWN, pPlayerMoveUp);
 
 		// Restart Function
 		auto RestartSinglePlayer = [&soundSystem, pRoundTimedSetActiveComp, pReadyTimedSetActiveComp]()

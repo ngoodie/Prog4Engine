@@ -30,7 +30,7 @@ void dae::RotatorComponent::Update(float deltaTime)
 	GetGameObject()->SetPosition(m_Radius * std::cosf(m_CurrentAngle), m_Radius * std::sinf(m_CurrentAngle));
 }
 
-void dae::RotatorComponent::FixedUpdate([[maybe_unused]] float deltaTime)
+void dae::RotatorComponent::FixedUpdate(float)
 {
 
 }

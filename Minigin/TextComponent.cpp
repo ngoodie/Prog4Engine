@@ -139,7 +139,7 @@ void dae::TextComponent::Update(float deltaTime)
 	}
 }
 
-void dae::TextComponent::FixedUpdate([[maybe_unused]] float deltaTime)
+void dae::TextComponent::FixedUpdate(float)
 {
 
 }

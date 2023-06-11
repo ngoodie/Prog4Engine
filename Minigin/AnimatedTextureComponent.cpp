@@ -80,7 +80,7 @@ void dae::AnimatedTextureComponent::Render() const
 
 	//std::cout << "srcX = " << srcX << ", srcY = " << srcY << std::endl;
 
-	Renderer::GetInstance().RenderTexture(*m_pTexture, pos.x, pos.y, m_SpriteWidth, m_SpriteHeight, srcX * m_SpriteWidth, srcY * m_SpriteHeight);
+	Renderer::GetInstance().RenderTexture(*m_pTexture, pos.x, pos.y, m_SpriteWidth, m_SpriteHeight, srcX * m_SpriteWidth, srcY * m_SpriteHeight, m_IsFlipped);
 }
 
 void dae::AnimatedTextureComponent::SetSpritesPerSecond(int spritesPerSecond)
@@ -101,7 +101,7 @@ void dae::AnimatedTextureComponent::Play(int startSpriteId, int endSpriteId, boo
 	m_Animate = true;
 }
 
-void dae::AnimatedTextureComponent::FixedUpdate([[maybe_unused]] float deltaTime)
+void dae::AnimatedTextureComponent::FixedUpdate(float )
 {
 
 }

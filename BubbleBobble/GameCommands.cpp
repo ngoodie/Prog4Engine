@@ -1,6 +1,7 @@
 #include "GameCommands.h"
 #include "GameObject.h"
 #include "MainMenuComponent.h"
+#include "PlayerComponent.h"
 
 #include "SceneManager.h"
 
@@ -47,4 +48,17 @@ void dae::MM_Back::Execute()
 void dae::TestCommand::Execute()
 {
 	SceneManager::GetInstance().SetScene("Intro", true);
+}
+
+dae::MovePlayerCommand::MovePlayerCommand(GameObject* pGameObject, float dirX, float dirY)
+	: Command(pGameObject)
+	, m_DirX{ dirX }
+	, m_DirY{ dirY }
+{
+	m_pPlayerComponent = pGameObject->GetComponent<PlayerComponent>();
+}
+
+void dae::MovePlayerCommand::Execute()
+{
+	m_pPlayerComponent->Move(m_DirX, m_DirY);
 }

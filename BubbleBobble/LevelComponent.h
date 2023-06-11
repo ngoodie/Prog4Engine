@@ -4,6 +4,7 @@
 
 namespace dae
 {
+	class ColliderComponent;
 	class LevelComponent : public Component
 	{
 	public:
@@ -11,6 +12,16 @@ namespace dae
 		~LevelComponent();
 
 		virtual void Initialize() override;
+
+		const std::vector<ColliderComponent*>& GetNearbyLevelTileColliders()
+		{
+			return m_pTilesColliders;
+		}
+
+		const std::vector<ColliderComponent*>& GetBorderColliders()
+		{
+			return m_pBorderColliders;
+		}
 
 		void Update(float deltaTime) override;
 		void FixedUpdate(float deltaTime) override;
@@ -20,5 +31,8 @@ namespace dae
 		const unsigned int LEVEL_LINE_SIZE{ 32 };
 		const float TILE_SIZE{ 16.f };
 		std::string m_LevelPath;
+
+		std::vector<ColliderComponent*> m_pTilesColliders{};
+		std::vector<ColliderComponent*> m_pBorderColliders{};
 	};
 }

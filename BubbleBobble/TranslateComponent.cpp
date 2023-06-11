@@ -22,7 +22,7 @@ void dae::TranslateComponent::Update(float deltaTime)
 	GetGameObject()->SetPosition(pos.x + m_DirX * m_Speed * deltaTime, pos.y + m_DirY * m_Speed * deltaTime);
 }
 
-void dae::TranslateComponent::FixedUpdate([[maybe_unused]] float deltaTime)
+void dae::TranslateComponent::FixedUpdate(float)
 {
 
 }

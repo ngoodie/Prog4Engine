@@ -18,6 +18,7 @@ namespace dae
 		void SetSpritesPerSecond(int spritesPerSecond);
 
 		void Play(int startSpriteId, int endSpriteId, bool playOnce = false, bool playBackAndForth = false);
+		void SetFlipped(bool isFlipped) { m_IsFlipped = isFlipped; }
 
 		int GetSpriteWidth() const { return m_SpriteWidth; }
 		int GetSpriteHeight() const { return m_SpriteHeight; }
@@ -48,5 +49,7 @@ namespace dae
 		bool m_PlayOnce{ false };
 		bool m_PlayBackAndForth{ false };
 		bool m_PlayReverse{ false };
+
+		bool m_IsFlipped{ false };
 	};
 }

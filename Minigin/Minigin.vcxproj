@@ -188,6 +188,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AnimatedTextureComponent.h" />
+    <ClInclude Include="ColliderComponent.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Font.h" />
@@ -199,6 +200,7 @@
     <ClInclude Include="IObserver.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="RigidbodyComponent.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SDLSoundSystem.h" />
@@ -212,6 +214,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AnimatedTextureComponent.cpp" />
+    <ClCompile Include="ColliderComponent.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Font.cpp" />
@@ -223,6 +226,7 @@
     <ClCompile Include="IObserver.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="RigidbodyComponent.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SDLSoundSystem.cpp" />

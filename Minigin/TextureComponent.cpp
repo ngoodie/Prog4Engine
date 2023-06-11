@@ -20,12 +20,12 @@ dae::TextureComponent::~TextureComponent()
 
 }
 
-void dae::TextureComponent::Update([[maybe_unused]]float deltaTime)
+void dae::TextureComponent::Update(float)
 {
 
 }
 
-void dae::TextureComponent::FixedUpdate([[maybe_unused]] float deltaTime)
+void dae::TextureComponent::FixedUpdate(float)
 {
 
 }

@@ -1,6 +1,7 @@
 #include "LevelComponent.h"
 #include "GameObject.h"
 #include "TextureComponent.h"
+#include "ColliderComponent.h"
 #include <iostream>
 #include <fstream>
 
@@ -17,6 +18,9 @@ dae::LevelComponent::~LevelComponent()
 
 void dae::LevelComponent::Initialize()
 {
+    GameObject* pGameObject = GetGameObject();
+
+    // load level
     std::ifstream inFile(m_LevelPath.c_str());
 
     if (!inFile)
@@ -24,8 +28,6 @@ void dae::LevelComponent::Initialize()
         std::cerr << "Unable to open file";
         return;
     }
-
-    GameObject* pGameObject = GetGameObject();
 
     std::vector<char> prevLine{};
     std::vector<char> curLine{};
@@ -91,6 +93,7 @@ void dae::LevelComponent::Initialize()
             case '1':
                 auto pTileGo = std::make_shared<GameObject>();
                 pTileGo->AddComponent(new TextureComponent("tile1.png"));
+                m_pTilesColliders.emplace_back(pTileGo->AddComponent(new ColliderComponent(16, 16)));
                 pTileGo->SetPosition(linePos * TILE_SIZE, TILE_SIZE * 2 + lineNr * TILE_SIZE);
                 pGameObject->AddChild(pTileGo);
                 break;
@@ -107,6 +110,19 @@ void dae::LevelComponent::Initialize()
     }
 
     inFile.close();
+
+    //fill border colliders
+    for (auto pCollider : m_pTilesColliders)
+    {
+        if (pCollider->GetCollisionRect().p0x < 32.f)
+        {
+            m_pBorderColliders.emplace_back(pCollider);
+        }
+        else if (pCollider->GetCollisionRect().p0x >= 512.f - 32.f)
+        {
+            m_pBorderColliders.emplace_back(pCollider);
+        }
+    }
 }
 
 void dae::LevelComponent::Update(float)
