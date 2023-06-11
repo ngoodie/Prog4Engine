@@ -157,8 +157,10 @@
     <ClCompile Include="GameCommands.cpp" />
     <ClCompile Include="LevelComponent.cpp" />
     <ClCompile Include="MainMenuComponent.cpp" />
+    <ClCompile Include="PlayerComponent.cpp" />
     <ClCompile Include="RotatorComponent.cpp" />
     <ClCompile Include="TimedSceneSwitchComponent.cpp" />
+    <ClCompile Include="TimedSetActiveComponent.cpp" />
     <ClCompile Include="TranslateComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -167,8 +169,10 @@
     <ClInclude Include="GameCommands.h" />
     <ClInclude Include="LevelComponent.h" />
     <ClInclude Include="MainMenuComponent.h" />
+    <ClInclude Include="PlayerComponent.h" />
     <ClInclude Include="RotatorComponent.h" />
     <ClInclude Include="TimedSceneSwitchComponent.h" />
+    <ClInclude Include="TimedSetActiveComponent.h" />
     <ClInclude Include="TranslateComponent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

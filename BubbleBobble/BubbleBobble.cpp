@@ -22,6 +22,8 @@
 #include "RotatorComponent.h"
 #include "BubblesGeneratorComponent.h"
 #include "LevelComponent.h"
+#include "TimedSetActiveComponent.h"
+#include "PlayerComponent.h"
 
 #include "InputManager.h"
 
@@ -246,6 +248,7 @@ namespace dae
 			soundSystem.Play(0, 1.f);
 			pMainMenuComp->SetState(MainMenuState::LOGO);
 			pMainMenuComp->SetSelection(0);
+
 			std::cout << "restarted main menu\n";
 		};
 		pMainMenuScene.SetRestartFunction(RestartMainMenu);
@@ -340,6 +343,7 @@ namespace dae
 			pTextComp3->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
 			pTimedSceneSwitchComp->ResetTimer();
 			pBubblesGeneratorComp->Restart();
+
 			std::cout << "restarted intro\n";
 		};
 		pIntroScene.SetRestartFunction(RestartIntro);
@@ -376,10 +380,32 @@ namespace dae
 		pSinglePlayerScene.Add(pLevel1Go);
 		pLevel1Comp;
 
+		// Round# Text
+		auto pRoundGo = std::make_shared<GameObject>();
+		auto pRoundTextComp = pRoundGo->AddComponent(new TextComponent("ROUND  1", arcadeFont, 255, 255, 255));
+		auto pRoundTimedSetActiveComp = pRoundGo->AddComponent(new TimedSetActiveComponent(2.5f, false));
+		pRoundGo->SetPosition(screenWidth / 2.f - pRoundTextComp->GetWidth() / 2.f, 208.f);
+		pSinglePlayerScene.Add(pRoundGo);
+
+		auto pReadyGo = std::make_shared<GameObject>();
+		auto pReadyTextComp = pReadyGo->AddComponent(new TextComponent("READY !", arcadeFont, 255, 255, 255));
+		auto pReadyTimedSetActiveComp = pReadyGo->AddComponent(new TimedSetActiveComponent(2.5f, false));
+		pReadyGo->SetPosition(screenWidth / 2.f - pReadyTextComp->GetWidth() / 2.f, 240.f);
+		pSinglePlayerScene.Add(pReadyGo);
+
+		// Player
+		auto pPlayer = std::make_shared<GameObject>();
+		pPlayer->AddComponent(new PlayerComponent(48.f, screenHeight - 80.f));
+		pSinglePlayerScene.Add(pPlayer);
+
 		// Restart Function
-		auto RestartSinglePlayer = [&soundSystem]()
+		auto RestartSinglePlayer = [&soundSystem, pRoundTimedSetActiveComp, pReadyTimedSetActiveComp]()
 		{
 			soundSystem.PlayMusic(1, 1.f, -1);
+			soundSystem.StopMusic(); //todo: remove
+			pRoundTimedSetActiveComp->ResetTimer();
+			pReadyTimedSetActiveComp->ResetTimer();
+
 			std::cout << "restarted single player\n";
 		};
 		pSinglePlayerScene.SetRestartFunction(RestartSinglePlayer);
