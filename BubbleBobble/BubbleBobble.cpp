@@ -7,7 +7,7 @@
 #endif
 #endif
 
-#include "Minigin.h"
+#include "DuvelEngine.h"
 #include "SceneManager.h"
 #include "ResourceManager.h"
 #include "GameObject.h"
@@ -449,7 +449,7 @@ int main(int, char* [])
 {
 	ServiceLocator::RegisterSoundSystem(std::make_unique<SDLSoundSystem>());
 
-	dae::Minigin engine("../Data/");
+	dae::DuvelEngine engine("../Data/");
 	engine.Run(dae::load);
 	return 0;
 }
