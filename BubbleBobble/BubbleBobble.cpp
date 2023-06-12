@@ -193,12 +193,18 @@ namespace dae
 		input.AddControllerCommand(pMainMenuScene.GetId(), 0, ControllerButton::Start, PressType::DOWN, pMainMenuConfirmCommand);
 		pMainMenuConfirmCommand = new MM_Confirm(pMainMenuGo.get(), soundSystem, 0, 1.f);
 		input.AddControllerCommand(pMainMenuScene.GetId(), 0, ControllerButton::ButtonA, PressType::DOWN, pMainMenuConfirmCommand);
+		pMainMenuConfirmCommand = new MM_Confirm(pMainMenuGo.get(), soundSystem, 0, 1.f);
+		input.AddKeyboardCommand(pMainMenuScene.GetId(), SDL_SCANCODE_RETURN, PressType::DOWN, pMainMenuConfirmCommand);
 
 		Command* pMainMenuUpCommand = new MM_Select(pMainMenuGo.get(), -1);
 		input.AddControllerCommand(pMainMenuScene.GetId(), 0, ControllerButton::DPadUp, PressType::DOWN, pMainMenuUpCommand);
+		pMainMenuUpCommand = new MM_Select(pMainMenuGo.get(), -1);
+		input.AddKeyboardCommand(pMainMenuScene.GetId(),SDL_SCANCODE_UP, PressType::DOWN, pMainMenuUpCommand);
 
 		Command* pMainMenuDownCommand = new MM_Select(pMainMenuGo.get(), 1);
 		input.AddControllerCommand(pMainMenuScene.GetId(), 0, ControllerButton::DPadDown, PressType::DOWN, pMainMenuDownCommand);
+		pMainMenuDownCommand = new MM_Select(pMainMenuGo.get(), 1);
+		input.AddKeyboardCommand(pMainMenuScene.GetId(), SDL_SCANCODE_DOWN, PressType::DOWN, pMainMenuDownCommand);
 
 		Command* pMainMenuBackCommand = new MM_Back(pMainMenuGo.get());
 		input.AddControllerCommand(pMainMenuScene.GetId(), 0, ControllerButton::Back, PressType::DOWN, pMainMenuBackCommand);
@@ -298,7 +304,7 @@ namespace dae
 
 		// Next Scene Timer
 		auto pNextSceneGo = std::make_shared<GameObject>();
-		auto pTimedSceneSwitchComp = pNextSceneGo->AddComponent(new TimedSceneSwitchComponent(0.5f/*8.5f*/, "SinglePlayer", true));
+		auto pTimedSceneSwitchComp = pNextSceneGo->AddComponent(new TimedSceneSwitchComponent(8.5f, "SinglePlayer", true));
 		pIntroScene.Add(pNextSceneGo);
 
 		// Restart Function
@@ -459,7 +465,7 @@ namespace dae
 				int levelId{ GameState::GetInstance().GetLevelId() };
 
 				soundSystem.PlayMusic(1, 1.f, -1);
-				soundSystem.StopMusic(); //todo: remove
+				//soundSystem.StopMusic(); //todo: remove
 				pRoundTimedSetActiveComp->ResetTimer();
 				pRoundGo->SetActive(true);
 				pRoundGo->GetComponent<TextComponent>()->SetText("ROUND  " + std::to_string(levelId));
