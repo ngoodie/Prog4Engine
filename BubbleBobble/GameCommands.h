@@ -71,4 +71,15 @@ namespace dae
 		float m_DirX;
 		float m_DirY;
 	};
+
+	class ShootBubblePlayerCommand final : public Command
+	{
+	public:
+		ShootBubblePlayerCommand(GameObject* pGameObject);
+		~ShootBubblePlayerCommand() override = default;
+
+		void Execute() override;
+	private:
+		PlayerComponent* m_pPlayerComponent;
+	};
 }

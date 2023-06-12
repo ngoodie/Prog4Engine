@@ -93,7 +93,7 @@ void dae::LevelComponent::Initialize()
             case '1':
                 auto pTileGo = std::make_shared<GameObject>();
                 pTileGo->AddComponent(new TextureComponent("tile1.png"));
-                m_pTilesColliders.emplace_back(pTileGo->AddComponent(new ColliderComponent(16, 16)));
+                if (lineNr > 0) m_pTilesColliders.emplace_back(pTileGo->AddComponent(new ColliderComponent(16, 16)));
                 pTileGo->SetPosition(linePos * TILE_SIZE, TILE_SIZE * 2 + lineNr * TILE_SIZE);
                 pGameObject->AddChild(pTileGo);
                 break;

@@ -62,3 +62,14 @@ void dae::MovePlayerCommand::Execute()
 {
 	m_pPlayerComponent->Move(m_DirX, m_DirY);
 }
+
+dae::ShootBubblePlayerCommand::ShootBubblePlayerCommand(GameObject* pGameObject)
+	: Command(pGameObject)
+{
+	m_pPlayerComponent = pGameObject->GetComponent<PlayerComponent>();
+}
+
+void dae::ShootBubblePlayerCommand::Execute()
+{
+	m_pPlayerComponent->ShootBubble();
+}

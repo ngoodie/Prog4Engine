@@ -1,6 +1,7 @@
 #pragma once
 #include "Component.h"
 
+class ISoundSystem;
 namespace dae
 {
 	enum class PlayerState : unsigned
@@ -10,6 +11,7 @@ namespace dae
 		RUNNING,
 		JUMPING,
 		FALLING,
+		SHOOT_BUBBLE,
 		DEAD
 	};
 
@@ -25,9 +27,10 @@ namespace dae
 	class PlayerComponent : public Component
 	{
 	public:
-		PlayerComponent(float startX, float startY)
+		PlayerComponent(float startX, float startY, int spriteId)
 			: m_StartX{ startX }
 			, m_StartY{ startY }
+			, m_SpriteId{ spriteId }
 		{}
 
 		~PlayerComponent();
@@ -47,6 +50,10 @@ namespace dae
 		void Initialize() override;
 
 		void Move(float dirX, float dirY);
+		int GetLives() const { return m_Lives; }
+		int GetSpriteId() const { return m_SpriteId; }
+
+		void ShootBubble();
 
 		void Update(float deltaTime) override;
 		void FixedUpdate(float deltaTime) override;
@@ -58,6 +65,13 @@ namespace dae
 		RigidbodyComponent* m_pRigidBodyComponent{ nullptr };
 
 		LevelComponent* m_pLevelComponent{ nullptr };
+
+		float m_DeathTimer{ 0 };
+		float m_DeathDuration{ 2.75f / 2.f };
+		float m_ShootTimer{ 0 };
+		float m_ShootDuration{ 1 / 3.f };
+		int m_Lives{ 3 };
+		int m_SpriteId;
 
 		float m_StartX;
 		float m_StartY;
@@ -76,5 +90,7 @@ namespace dae
 
 		int m_SpriteOffset{ 16 };
 		bool m_IsGrounded{ true };
+
+		ISoundSystem* m_pSoundSystem{ nullptr };
 	};
 }

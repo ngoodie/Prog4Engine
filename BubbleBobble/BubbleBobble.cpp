@@ -26,6 +26,7 @@
 #include "PlayerComponent.h"
 #include "ColliderComponent.h"
 #include "RigidbodyComponent.h"
+#include "PlayerLivesComponent.h"
 
 #include "InputManager.h"
 
@@ -47,6 +48,8 @@ namespace dae
 		auto& soundSystem = ServiceLocator::GetSoundSystem();
 		soundSystem.RegisterSound(0, "../Data/Sfx/opening.wav");
 		soundSystem.RegisterSound(1, "../Data/Sfx/bublbobl-051_insert_coin.wav");
+		soundSystem.RegisterSound(2, "../Data/Sfx/bublbobl-040_jump.wav");
+		soundSystem.RegisterSound(3, "../Data/Sfx/bublbobl-047_shoot_bubble.wav");
 
 		soundSystem.RegisterMusic(0, "../Data/Music/intro_music.mp3");
 		soundSystem.RegisterMusic(1, "../Data/Music/main_theme.mp3");
@@ -395,11 +398,20 @@ namespace dae
 		pReadyGo->SetPosition(screenWidth / 2.f - pReadyTextComp->GetWidth() / 2.f, 240.f);
 		pSinglePlayerScene.Add(pReadyGo);
 
+		// Player Lives
+		auto pPlayerLives = std::make_shared<GameObject>();
+		auto pPlayerLivesComp = pPlayerLives->AddComponent(new PlayerLivesComponent(0, screenHeight - 16.f));
+		pSinglePlayerScene.Add(pPlayerLives);
+
 		// Player
 		auto pPlayer = std::make_shared<GameObject>();
-		auto pPlayerComp = pPlayer->AddComponent(new PlayerComponent(48.f, screenHeight - 80.f));
+		auto pPlayerComp = pPlayer->AddComponent(new PlayerComponent(48.f, screenHeight - 80.f, 1));
 		pPlayerComp->RegisterLevel(pLevel1Comp);
+		pPlayerComp->AddObserver(pPlayerLivesComp);
 		pSinglePlayerScene.Add(pPlayer);
+
+		pPlayerLivesComp->SetSpriteId(pPlayerComp->GetSpriteId());
+		pPlayerLivesComp->InitializeLives(pPlayerComp->GetLives());
 
 		// Commands
 		Command* pPlayerMoveLeft = new MovePlayerCommand(pPlayer.get(), -1.f, 0);
@@ -410,6 +422,9 @@ namespace dae
 
 		Command* pPlayerMoveUp = new MovePlayerCommand(pPlayer.get(), 0, 1.f);
 		input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::ButtonB, PressType::DOWN, pPlayerMoveUp);
+
+		Command* pPlayerShootBubble = new ShootBubblePlayerCommand(pPlayer.get());
+		input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::ButtonA, PressType::DOWN, pPlayerShootBubble);
 
 		// Restart Function
 		auto RestartSinglePlayer = [&soundSystem, pRoundTimedSetActiveComp, pReadyTimedSetActiveComp]()

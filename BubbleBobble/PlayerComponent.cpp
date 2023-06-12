@@ -4,6 +4,8 @@
 #include "LevelComponent.h"
 #include "ColliderComponent.h"
 #include "RigidbodyComponent.h"
+#include "ServiceLocator.h"
+#include "GameEvents.h"
 
 dae::PlayerComponent::~PlayerComponent()
 {
@@ -17,10 +19,12 @@ void dae::PlayerComponent::RegisterLevel(LevelComponent* pLevelComponent)
 
 void dae::PlayerComponent::Initialize()
 {
+	m_pSoundSystem = &ServiceLocator::GetSoundSystem();
+
 	GameObject* pGameObject = GetGameObject();
 	pGameObject->SetPosition(m_StartX /* - m_SpriteOffset*/, m_StartY);
 
-	m_pPlayerAnimTexComp = pGameObject->AddComponent(new AnimatedTextureComponent("player1.png", 64, 64, 8, 5));
+	m_pPlayerAnimTexComp = pGameObject->AddComponent(new AnimatedTextureComponent("player" + std::to_string(m_SpriteId) + ".png", 64, 64, 8, 5));
 	pGameObject->AddComponent(new ColliderComponent(32, 32, false, m_SpriteOffset, 32));
 	m_pRigidBodyComponent = pGameObject->AddComponent(new RigidbodyComponent());
 
@@ -53,6 +57,8 @@ void dae::PlayerComponent::Move(float dirX, float dirY)
 		{
 			if (m_State != PlayerState::JUMPING)
 			{
+				m_pSoundSystem->Play(2, 1.f);
+
 				m_CurrentYSpeed = -dirY * m_JumpSpeed;
 				SetState(PlayerState::JUMPING);
 			}
@@ -69,11 +75,31 @@ void dae::PlayerComponent::ExitState()
 {
 	switch (m_State)
 	{
-	case PlayerState::IDLE:
-		
-		break;
-	case PlayerState::RUNNING:
-		
+	case PlayerState::SHOOT_BUBBLE:
+		if (!m_IsGrounded)
+		{
+			if (m_CurrentYSpeed > 0)
+			{
+				m_State = PlayerState::FALLING;
+				EnterState();
+			}
+			else
+			{
+				m_State = PlayerState::JUMPING;
+				m_pPlayerAnimTexComp->SetSpritesPerSecond(8);
+				m_pPlayerAnimTexComp->Play(5, 6);
+			}
+		}
+		else if (fabs(m_CurrentYSpeed > 0))
+		{
+			m_State = PlayerState::RUNNING;
+			EnterState();
+		}
+		else
+		{
+			m_State = PlayerState::IDLE;
+			EnterState();
+		}
 		break;
 	default:
 		break;
@@ -101,9 +127,28 @@ void dae::PlayerComponent::EnterState()
 		m_pPlayerAnimTexComp->SetSpritesPerSecond(8);
 		m_pPlayerAnimTexComp->Play(7, 8);
 		break;
+	case PlayerState::DEAD:
+		m_DeathTimer = 0;
+		m_pPlayerAnimTexComp->SetSpritesPerSecond(8);
+		m_pPlayerAnimTexComp->Play(13, 23);
+		break;
+	case PlayerState::SHOOT_BUBBLE:
+		m_ShootTimer = 0;
+		m_pPlayerAnimTexComp->SetSpritesPerSecond(12);
+		m_pPlayerAnimTexComp->Play(9, 12);
+		break;
 	default:
 		break;
 	}
+}
+
+void dae::PlayerComponent::ShootBubble()
+{
+	if (m_State == PlayerState::SHOOT_BUBBLE || m_State == PlayerState::DEAD)
+		return;
+
+	m_pSoundSystem->Play(3, 1.f);
+	SetState(PlayerState::SHOOT_BUBBLE);
 }
 
 void dae::PlayerComponent::Update(float deltaTime)
@@ -132,6 +177,31 @@ void dae::PlayerComponent::Update(float deltaTime)
 		if (m_IsGrounded)
 		{
 			SetState(PlayerState::IDLE);
+		}
+		break;
+	case PlayerState::DEAD:
+		m_DeathTimer += deltaTime;
+		if (m_DeathTimer >= m_DeathDuration)
+		{
+			if (m_Lives > 0)
+			{
+				m_Lives--;
+				NotifyObservers(static_cast<unsigned>(PlayerEvents::DIED));
+				GetGameObject()->SetPosition(m_StartX, m_StartY);
+				SetState(PlayerState::IDLE);
+			}
+			else
+			{
+				//GAME OVER
+			}
+			m_DeathTimer = 0;
+		}
+	case PlayerState::SHOOT_BUBBLE:
+		m_ShootTimer += deltaTime;
+		if (m_ShootTimer >= m_ShootDuration)
+		{
+			m_ShootTimer = 0;
+			ExitState();
 		}
 		break;
 	}
@@ -163,7 +233,7 @@ void dae::PlayerComponent::Update(float deltaTime)
 	}
 	else
 	{
-		m_CurrentYSpeed = 0;
+		//m_CurrentYSpeed = 0;
 	}
 }
 

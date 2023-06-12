@@ -158,6 +158,7 @@
     <ClCompile Include="LevelComponent.cpp" />
     <ClCompile Include="MainMenuComponent.cpp" />
     <ClCompile Include="PlayerComponent.cpp" />
+    <ClCompile Include="PlayerLivesComponent.cpp" />
     <ClCompile Include="RotatorComponent.cpp" />
     <ClCompile Include="TimedSceneSwitchComponent.cpp" />
     <ClCompile Include="TimedSetActiveComponent.cpp" />
@@ -167,9 +168,11 @@
     <ClInclude Include="BubblesGeneratorComponent.h" />
     <ClInclude Include="FPSComponent.h" />
     <ClInclude Include="GameCommands.h" />
+    <ClInclude Include="GameEvents.h" />
     <ClInclude Include="LevelComponent.h" />
     <ClInclude Include="MainMenuComponent.h" />
     <ClInclude Include="PlayerComponent.h" />
+    <ClInclude Include="PlayerLivesComponent.h" />
     <ClInclude Include="RotatorComponent.h" />
     <ClInclude Include="TimedSceneSwitchComponent.h" />
     <ClInclude Include="TimedSetActiveComponent.h" />

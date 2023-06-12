@@ -26,12 +26,10 @@ bool dae::RigidbodyComponent::Move(float x, float y, const std::vector<ColliderC
 		GetGameObject()->SetPosition(pos.x + x, pos.y);
 		if (IsCollidingWith(pColliders, collisionX, collisionY))
 		{
-			GetGameObject()->SetPosition(pos.x, pos.y);
-			//if (collisionX > pos.x + x)
-			//	GetGameObject()->SetPosition(collisionX - colliderData.offsetX, pos.y);
-			//else if (collisionX != pos.x + x)
-				//GetGameObject()->SetPosition(collisionX + colliderData.offsetX * 2 + colliderData.width , pos.y);
-			//std::cout << "xCollision !" << std::endl;
+			if (x > 0)
+				GetGameObject()->SetPosition(collisionX - colliderData.offsetX - colliderData.width, pos.y);
+			else if (x < 0)
+				GetGameObject()->SetPosition(collisionX - colliderData.offsetX, pos.y);
 		}
 	}
 
@@ -41,15 +39,34 @@ bool dae::RigidbodyComponent::Move(float x, float y, const std::vector<ColliderC
 		GetGameObject()->SetPosition(pos.x, pos.y + y);
 		if (IsCollidingWith(pColliders, collisionX, collisionY))
 		{
-			GetGameObject()->SetPosition(pos.x, pos.y);
-			//std::cout << "yCollision !" << std::endl;
+			if (y > 0)
+			{
+				GetGameObject()->SetPosition(pos.x, collisionY - colliderData.offsetY - colliderData.height);
 
-			float minY = std::min({ collisionRect.p0y, collisionRect.p1y, collisionRect.p2y, collisionRect.p3y });
-			return (minY <= collisionY);
+				float minY = std::min({ collisionRect.p0y, collisionRect.p1y, collisionRect.p2y, collisionRect.p3y });
+				return (minY <= collisionY);
+			}
+			else if (y < 0)
+				GetGameObject()->SetPosition(pos.x, collisionY - colliderData.offsetY);
 		}
 	}
 
-	return false;
+	float rayCastDistance{ 4.f };
+	pos = GetGameObject()->GetWorldPosition();
+	GetGameObject()->SetPosition(pos.x, pos.y + rayCastDistance);
+	if (IsCollidingWith(pColliders, collisionX, collisionY))
+	{
+		float minY = std::min({ collisionRect.p2y, collisionRect.p2y, collisionRect.p2y, collisionRect.p2y });
+		float minY2 = std::min({ collisionRect.p3y, collisionRect.p3y, collisionRect.p3y, collisionRect.p3y });
+
+		GetGameObject()->SetPosition(pos.x, pos.y);
+		return (minY <= collisionY || minY2 <= collisionY);
+	}
+	else
+	{
+		GetGameObject()->SetPosition(pos.x, pos.y);
+		return false;
+	}
 }
 
 bool dae::RigidbodyComponent::IsCollidingWith(const std::vector<ColliderComponent*>& pColliders, float& collisionX, float& collisionY)

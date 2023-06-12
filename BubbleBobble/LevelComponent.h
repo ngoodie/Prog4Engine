@@ -22,7 +22,7 @@ namespace dae
 		{
 			return m_pBorderColliders;
 		}
-
+		
 		void Update(float deltaTime) override;
 		void FixedUpdate(float deltaTime) override;
 		void Render() const override {};
