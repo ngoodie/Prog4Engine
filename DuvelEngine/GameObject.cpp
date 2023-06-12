@@ -50,6 +50,11 @@ void dae::GameObject::LateUpdate(float)
 	{
 		for (auto pChild : m_pChildren)
 		{
+			pChild.get()->SetActive(false);
+		}
+
+		for (auto pChild : m_pChildren)
+		{
 			RemoveChild(pChild.get());
 		}
 		m_RemoveAllChildren = false;

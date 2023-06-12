@@ -16,6 +16,7 @@ namespace dae
 		~TimedSceneSwitchComponent();
 
 		void ResetTimer() { m_Timer = 0; }
+		void SetNextScene(std::string sceneName) { m_SceneName = sceneName; }
 
 		void Update(float deltaTime) override;
 		void FixedUpdate(float deltaTime) override;

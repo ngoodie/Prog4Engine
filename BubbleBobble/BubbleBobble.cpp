@@ -27,8 +27,10 @@
 #include "ColliderComponent.h"
 #include "RigidbodyComponent.h"
 #include "PlayerLivesComponent.h"
+#include "ZenChanComponent.h"
 
 #include "InputManager.h"
+#include "GameState.h"
 
 #include "ServiceLocator.h"
 #include "SDLSoundSystem.h"
@@ -42,6 +44,16 @@ namespace dae
 {
 	void load()
 	{
+		GameState::GetInstance().SetPlayer1Lives(3);
+		GameState::GetInstance().SetPlayer2Lives(3);
+
+		GameState::GetInstance().SetPlayer1Score(0);
+		GameState::GetInstance().SetPlayer2Score(0);
+
+		GameState::GetInstance().SetHighScore(30000);
+
+		GameState::GetInstance().SetLevelId(1);
+
 		float screenWidth = 256 * 2;
 		float screenHeight = 224 * 2;
 
@@ -62,61 +74,6 @@ namespace dae
 
 		auto& input = InputManager::GetInstance();
 		auto arcadeFont = ResourceManager::GetInstance().LoadFont("Emulogic.ttf", 16);
-
-		/*
-		// Scene #1
-		auto& pDemoScene = SceneManager::GetInstance().CreateScene("Demo");
-
-		// Background
-		auto pBackgroundGo = std::make_shared<GameObject>();
-		pBackgroundGo->AddComponent(new TextureComponent("background.tga"));
-		pDemoScene.Add(pBackgroundGo);
-
-		// Logo
-		auto pLogoGo = std::make_shared<GameObject>();
-		pLogoGo->AddComponent(new TextureComponent("logo.tga"));
-		pLogoGo->SetPosition(216, 180);
-		pDemoScene.Add(pLogoGo);
-
-		// Text
-		auto pHeadTextGo = std::make_shared<GameObject>();
-		auto pFont36 = ResourceManager::GetInstance().LoadFont("Lingua.otf", 36);
-		pHeadTextGo->AddComponent(new TextComponent("Programming 4 Assignment", pFont36, 255, 255, 255));
-		pHeadTextGo->SetPosition(80, 20);
-		pDemoScene.Add(pHeadTextGo);
-
-		// FPS Counter
-		auto pFpsGo = std::make_shared<GameObject>();
-		auto pFont14 = ResourceManager::GetInstance().LoadFont("Lingua.otf", 14);
-		pFpsGo->AddComponent(new TextComponent("0", pFont14, 255, 255, 255));
-		pFpsGo->AddComponent(new FPSComponent());
-		pFpsGo->SetPosition(10, 10);
-		pDemoScene.Add(pFpsGo);
-
-		// Sprite#1
-		auto pSprite1 = std::make_shared<GameObject>();
-		pSprite1->AddComponent(new RotatorComponent(20.f, 7.5f, false));
-		pSprite1->AddComponent(new TextureComponent("pacman.png"));
-
-		// Sprite#2
-		auto pSprite2 = std::make_shared<GameObject>();
-		pSprite2->AddComponent(new RotatorComponent(20.f, 7.5f, true));
-		pSprite2->AddComponent(new TextureComponent("pacman2.png"));
-		pSprite1->AddChild(pSprite2);
-
-		auto pAnchorGo = std::make_shared<GameObject>();
-		pAnchorGo->SetPosition(100, 100);
-		pAnchorGo->AddChild(pSprite1);
-		pDemoScene.Add(pAnchorGo);
-
-		// Commands
-		Command* pTestCommand = new TestCommand(pSprite1.get());
-
-		input.AddControllerCommand(pDemoScene.GetId(), 0, ControllerButton::ButtonA, PressType::HELD, pTestCommand);
-
-		pTestCommand = new TestCommand(pSprite1.get());
-		input.AddKeyboardCommand(pDemoScene.GetId(), SDL_SCANCODE_A, PressType::DOWN, pTestCommand);
-		*/
 		
 		// **************
 		// MainMenu Scene
@@ -254,7 +211,17 @@ namespace dae
 			pMainMenuComp->SetState(MainMenuState::LOGO);
 			pMainMenuComp->SetSelection(0);
 
-			std::cout << "restarted main menu\n";
+			GameState::GetInstance().SetPlayer1Lives(3);
+			GameState::GetInstance().SetPlayer2Lives(3);
+
+			GameState::GetInstance().SetPlayer1Score(0);
+			GameState::GetInstance().SetPlayer2Score(0);
+
+			GameState::GetInstance().SetHighScore(30000);
+
+			GameState::GetInstance().SetLevelId(1);
+
+			//std::cout << "restarted main menu\n";
 		};
 		pMainMenuScene.SetRestartFunction(RestartMainMenu);
 
@@ -334,109 +301,438 @@ namespace dae
 		auto pTimedSceneSwitchComp = pNextSceneGo->AddComponent(new TimedSceneSwitchComponent(0.5f/*8.5f*/, "SinglePlayer", true));
 		pIntroScene.Add(pNextSceneGo);
 
-		// Commands
-		Command* pTestCommand2 = new TestCommand(pPlayerOne.get());
-		input.AddKeyboardCommand(pIntroScene.GetId(), SDL_SCANCODE_Y, PressType::DOWN, pTestCommand2);
-
 		// Restart Function
 		auto RestartIntro = [&soundSystem, pTextComp0, pTextComp1, pTextComp2, pTextComp3, pBubblesGeneratorComp, pTimedSceneSwitchComp]()
 		{
+			auto gameMode = GameState::GetInstance().GetGameMode();
+
 			soundSystem.PlayMusic(0, 1.f, 1);
 			pTextComp0->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
 			pTextComp1->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
 			pTextComp2->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
 			pTextComp3->SetColorOverTime(0, 0, 0, 255, 0, 0, 2.0f);
 			pTimedSceneSwitchComp->ResetTimer();
+
+			switch (gameMode)
+			{
+			case GameMode::SINGLEPLAYER:
+				pTimedSceneSwitchComp->SetNextScene("SinglePlayer");
+				break;
+			case GameMode::COOP:
+				pTimedSceneSwitchComp->SetNextScene("MultiPlayer");
+				break;
+			}
+
 			pBubblesGeneratorComp->Restart();
 
-			std::cout << "restarted intro\n";
+			//std::cout << "restarted intro\n";
 		};
 		pIntroScene.SetRestartFunction(RestartIntro);
 
-		// ******************
-		// SinglePlayer Scene
-		// ******************
-		auto& pSinglePlayerScene = SceneManager::GetInstance().CreateScene("SinglePlayer");
-
-		// UI Text
-		p1UpGo = std::make_shared<GameObject>();
-		p1UpTextComp = p1UpGo->AddComponent(new TextComponent("1UP", arcadeFont, 0, 255, 0));
-		p1UpGo->SetPosition(88 - p1UpTextComp->GetWidth() / 2.f, -4.f);
-		pSinglePlayerScene.Add(p1UpGo);
-
-		p1ScoreGo = std::make_shared<GameObject>();
-		p1ScoreTextComp = p1ScoreGo->AddComponent(new TextComponent("   00", arcadeFont, 255, 255, 255));
-		p1ScoreGo->SetPosition(88 - p1ScoreTextComp->GetWidth() / 2.f, 12.f);
-		pSinglePlayerScene.Add(p1ScoreGo);
-
-		pHighScoreTitleGo = std::make_shared<GameObject>();
-		pHighScoreTitleTextComp = pHighScoreTitleGo->AddComponent(new TextComponent("HIGH SCORE", arcadeFont, 255, 0, 0));
-		pHighScoreTitleGo->SetPosition(screenWidth / 2.f - pHighScoreTitleTextComp->GetWidth() / 2.f, -4.f);
-		pSinglePlayerScene.Add(pHighScoreTitleGo);
-
-		pHighScoreGo = std::make_shared<GameObject>();
-		pHighScoreTextComp = pHighScoreGo->AddComponent(new TextComponent(" 30000", arcadeFont, 255, 255, 255));
-		pHighScoreGo->SetPosition(screenWidth / 2.f - pHighScoreTextComp->GetWidth() / 2.f, 12.f);
-		pSinglePlayerScene.Add(pHighScoreGo);
-
-		// Level
-		auto pLevel1Go = std::make_shared<GameObject>();
-		auto pLevel1Comp = pLevel1Go->AddComponent(new LevelComponent("../Data/Levels/level1.txt"));
-		pSinglePlayerScene.Add(pLevel1Go);
-		pLevel1Comp;
-
-		// Round# Text
-		auto pRoundGo = std::make_shared<GameObject>();
-		auto pRoundTextComp = pRoundGo->AddComponent(new TextComponent("ROUND  1", arcadeFont, 255, 255, 255));
-		auto pRoundTimedSetActiveComp = pRoundGo->AddComponent(new TimedSetActiveComponent(2.5f, false));
-		pRoundGo->SetPosition(screenWidth / 2.f - pRoundTextComp->GetWidth() / 2.f, 208.f);
-		pSinglePlayerScene.Add(pRoundGo);
-
-		auto pReadyGo = std::make_shared<GameObject>();
-		auto pReadyTextComp = pReadyGo->AddComponent(new TextComponent("READY !", arcadeFont, 255, 255, 255));
-		auto pReadyTimedSetActiveComp = pReadyGo->AddComponent(new TimedSetActiveComponent(2.5f, false));
-		pReadyGo->SetPosition(screenWidth / 2.f - pReadyTextComp->GetWidth() / 2.f, 240.f);
-		pSinglePlayerScene.Add(pReadyGo);
-
-		// Player Lives
-		auto pPlayerLives = std::make_shared<GameObject>();
-		auto pPlayerLivesComp = pPlayerLives->AddComponent(new PlayerLivesComponent(0, screenHeight - 16.f));
-		pSinglePlayerScene.Add(pPlayerLives);
-
-		// Player
-		auto pPlayer = std::make_shared<GameObject>();
-		auto pPlayerComp = pPlayer->AddComponent(new PlayerComponent(48.f, screenHeight - 80.f, 1));
-		pPlayerComp->RegisterLevel(pLevel1Comp);
-		pPlayerComp->AddObserver(pPlayerLivesComp);
-		pSinglePlayerScene.Add(pPlayer);
-
-		pPlayerLivesComp->SetSpriteId(pPlayerComp->GetSpriteId());
-		pPlayerLivesComp->InitializeLives(pPlayerComp->GetLives());
-
-		// Commands
-		Command* pPlayerMoveLeft = new MovePlayerCommand(pPlayer.get(), -1.f, 0);
-		input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::DPadLeft, PressType::HELD, pPlayerMoveLeft);
-
-		Command* pPlayerMoveRight = new MovePlayerCommand(pPlayer.get(), 1.f, 0);
-		input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::DPadRight, PressType::HELD, pPlayerMoveRight);
-
-		Command* pPlayerMoveUp = new MovePlayerCommand(pPlayer.get(), 0, 1.f);
-		input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::ButtonB, PressType::DOWN, pPlayerMoveUp);
-
-		Command* pPlayerShootBubble = new ShootBubblePlayerCommand(pPlayer.get());
-		input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::ButtonA, PressType::DOWN, pPlayerShootBubble);
-
-		// Restart Function
-		auto RestartSinglePlayer = [&soundSystem, pRoundTimedSetActiveComp, pReadyTimedSetActiveComp]()
 		{
-			soundSystem.PlayMusic(1, 1.f, -1);
-			soundSystem.StopMusic(); //todo: remove
-			pRoundTimedSetActiveComp->ResetTimer();
-			pReadyTimedSetActiveComp->ResetTimer();
+			// ******************
+			// SinglePlayer Scene
+			// ******************
+			auto& pSinglePlayerScene = SceneManager::GetInstance().CreateScene("SinglePlayer");
 
-			std::cout << "restarted single player\n";
-		};
-		pSinglePlayerScene.SetRestartFunction(RestartSinglePlayer);
+			// UI Text
+			p1UpGo = std::make_shared<GameObject>();
+			p1UpTextComp = p1UpGo->AddComponent(new TextComponent("1UP", arcadeFont, 0, 255, 0));
+			p1UpGo->SetPosition(88 - p1UpTextComp->GetWidth() / 2.f, -4.f);
+			pSinglePlayerScene.Add(p1UpGo);
+
+			p1ScoreGo = std::make_shared<GameObject>();
+			p1ScoreTextComp = p1ScoreGo->AddComponent(new TextComponent("   00", arcadeFont, 255, 255, 255));
+			p1ScoreGo->SetPosition(88 - p1ScoreTextComp->GetWidth() / 2.f, 12.f);
+			pSinglePlayerScene.Add(p1ScoreGo);
+
+			pHighScoreTitleGo = std::make_shared<GameObject>();
+			pHighScoreTitleTextComp = pHighScoreTitleGo->AddComponent(new TextComponent("HIGH SCORE", arcadeFont, 255, 0, 0));
+			pHighScoreTitleGo->SetPosition(screenWidth / 2.f - pHighScoreTitleTextComp->GetWidth() / 2.f, -4.f);
+			pSinglePlayerScene.Add(pHighScoreTitleGo);
+
+			pHighScoreGo = std::make_shared<GameObject>();
+			pHighScoreTextComp = pHighScoreGo->AddComponent(new TextComponent(" 30000", arcadeFont, 255, 255, 255));
+			pHighScoreGo->SetPosition(screenWidth / 2.f - pHighScoreTextComp->GetWidth() / 2.f, 12.f);
+			pSinglePlayerScene.Add(pHighScoreGo);
+
+			// Level1
+			auto pLevel1Go = std::make_shared<GameObject>();
+			auto pLevel1Comp = pLevel1Go->AddComponent(new LevelComponent(1));
+			pSinglePlayerScene.Add(pLevel1Go);
+
+			// Level2
+			auto pLevel2Go = std::make_shared<GameObject>();
+			pLevel2Go->AddComponent(new LevelComponent(2));
+			pSinglePlayerScene.Add(pLevel2Go);
+
+			// Level3
+			auto pLevel3Go = std::make_shared<GameObject>();
+			pLevel3Go->AddComponent(new LevelComponent(3));
+			pSinglePlayerScene.Add(pLevel3Go);
+
+			// Round# Text
+			auto pRoundGo = std::make_shared<GameObject>();
+			auto pRoundTextComp = pRoundGo->AddComponent(new TextComponent("ROUND  1", arcadeFont, 255, 255, 255));
+			auto pRoundTimedSetActiveComp = pRoundGo->AddComponent(new TimedSetActiveComponent(2.5f, false));
+			pRoundGo->SetPosition(screenWidth / 2.f - pRoundTextComp->GetWidth() / 2.f, 208.f);
+			pSinglePlayerScene.Add(pRoundGo);
+
+			auto pReadyGo = std::make_shared<GameObject>();
+			auto pReadyTextComp = pReadyGo->AddComponent(new TextComponent("READY !", arcadeFont, 255, 255, 255));
+			auto pReadyTimedSetActiveComp = pReadyGo->AddComponent(new TimedSetActiveComponent(2.5f, false));
+			pReadyGo->SetPosition(screenWidth / 2.f - pReadyTextComp->GetWidth() / 2.f, 240.f);
+			pSinglePlayerScene.Add(pReadyGo);
+
+			// Player Lives
+			auto pPlayerLives = std::make_shared<GameObject>();
+			auto pPlayerLivesComp = pPlayerLives->AddComponent(new PlayerLivesComponent(0, screenHeight - 16.f));
+			pSinglePlayerScene.Add(pPlayerLives);
+
+			// GameOver Observer
+			//auto pGameOverGo = std::make_shared<GameObject>();
+			//auto pGameOverComponent = pGameOverGo->AddComponent(new GameOverComponent(1));
+			//pMultiPlayerScene.Add(pGameOverGo);
+
+			// Player
+			auto pPlayer = std::make_shared<GameObject>();
+			auto pPlayerComp = pPlayer->AddComponent(new PlayerComponent(48.f, screenHeight - 80.f, 1, GameState::GetInstance().GetPlayer1Lives()));
+			pPlayerComp->RegisterLevel(pLevel1Comp);
+			pPlayerComp->AddObserver(pPlayerLivesComp);
+			//pPlayerComp->AddObserver(pGameOverComponent);
+			pSinglePlayerScene.Add(pPlayer);
+
+			pPlayerLivesComp->SetSpriteId(pPlayerComp->GetSpriteId());
+			pPlayerLivesComp->InitializeLives(pPlayerComp->GetLives());
+
+			// ZenChan Enemies
+			auto pZenChan = std::make_shared<GameObject>();
+			auto pZenChanComp = pZenChan->AddComponent(new ZenChanComponent(128.f, 64.f, EnemyFacingDirection::LEFT));
+			pZenChanComp->RegisterLevel(pLevel1Comp);
+			pSinglePlayerScene.Add(pZenChan);
+
+			auto pZenChan2 = std::make_shared<GameObject>();
+			auto pZenChan2Comp = pZenChan2->AddComponent(new ZenChanComponent(192.f, 64.f, EnemyFacingDirection::RIGHT));
+			pZenChan2Comp->RegisterLevel(pLevel1Comp);
+			pSinglePlayerScene.Add(pZenChan2);
+
+			auto pZenChan3 = std::make_shared<GameObject>();
+			auto pZenChan3Comp = pZenChan3->AddComponent(new ZenChanComponent(256.f, 64.f, EnemyFacingDirection::LEFT));
+			pZenChan3Comp->RegisterLevel(pLevel1Comp);
+			pSinglePlayerScene.Add(pZenChan3);
+
+			std::vector<ColliderComponent*> enemyColliders{};
+			enemyColliders.emplace_back(pZenChan->GetComponent<ColliderComponent>());
+			enemyColliders.emplace_back(pZenChan2->GetComponent<ColliderComponent>());
+			enemyColliders.emplace_back(pZenChan3->GetComponent<ColliderComponent>());
+
+			pPlayerComp->RegisterEnemyColliders(enemyColliders);
+
+			// Commands
+			Command* pPlayerMoveLeft = new MovePlayerCommand(pPlayer.get(), -1.f, 0);
+			input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::DPadLeft, PressType::HELD, pPlayerMoveLeft);
+			pPlayerMoveLeft = new MovePlayerCommand(pPlayer.get(), -1.f, 0);
+			input.AddKeyboardCommand(pSinglePlayerScene.GetId(), SDL_SCANCODE_LEFT, PressType::HELD, pPlayerMoveLeft);
+
+			Command* pPlayerMoveRight = new MovePlayerCommand(pPlayer.get(), 1.f, 0);
+			input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::DPadRight, PressType::HELD, pPlayerMoveRight);
+			pPlayerMoveRight = new MovePlayerCommand(pPlayer.get(), 1.f, 0);
+			input.AddKeyboardCommand(pSinglePlayerScene.GetId(), SDL_SCANCODE_RIGHT, PressType::HELD, pPlayerMoveRight);
+
+			Command* pPlayerMoveUp = new MovePlayerCommand(pPlayer.get(), 0, 1.f);
+			input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::ButtonB, PressType::DOWN, pPlayerMoveUp);
+			pPlayerMoveUp = new MovePlayerCommand(pPlayer.get(), 0, 1.f);
+			input.AddKeyboardCommand(pSinglePlayerScene.GetId(), SDL_SCANCODE_Z, PressType::DOWN, pPlayerMoveUp);
+
+			Command* pPlayerShootBubble = new ShootBubblePlayerCommand(pPlayer.get());
+			input.AddControllerCommand(pSinglePlayerScene.GetId(), 0, ControllerButton::ButtonA, PressType::DOWN, pPlayerShootBubble);
+			pPlayerShootBubble = new ShootBubblePlayerCommand(pPlayer.get());
+			input.AddKeyboardCommand(pSinglePlayerScene.GetId(), SDL_SCANCODE_X, PressType::DOWN, pPlayerShootBubble);
+
+			// Next level command
+			Command* pTestCommand = new TestCommand(pPlayer.get());
+			input.AddKeyboardCommand(pSinglePlayerScene.GetId(), SDL_SCANCODE_F1, PressType::DOWN, pTestCommand);
+
+			// Restart Function
+			auto RestartSinglePlayer = [&pSinglePlayerScene, &soundSystem, pRoundGo, pReadyGo, pRoundTimedSetActiveComp, pReadyTimedSetActiveComp, pPlayerComp, screenHeight, pLevel1Go, pLevel2Go, pLevel3Go, pZenChanComp, pZenChan2Comp, pZenChan3Comp]()
+			{
+				int levelId{ GameState::GetInstance().GetLevelId() };
+
+				soundSystem.PlayMusic(1, 1.f, -1);
+				soundSystem.StopMusic(); //todo: remove
+				pRoundTimedSetActiveComp->ResetTimer();
+				pRoundGo->SetActive(true);
+				pRoundGo->GetComponent<TextComponent>()->SetText("ROUND  " + std::to_string(levelId));
+				pReadyTimedSetActiveComp->ResetTimer();
+				pReadyGo->SetActive(true);
+
+				switch (levelId)
+				{
+				case 1:
+					pLevel1Go->SetActive(true);
+					pLevel2Go->SetActive(false);
+					pLevel3Go->SetActive(false);
+					pPlayerComp->RegisterLevel(pLevel1Go->GetComponent<LevelComponent>());
+					pZenChanComp->RegisterLevel(pLevel1Go->GetComponent<LevelComponent>());
+					pZenChan2Comp->RegisterLevel(pLevel1Go->GetComponent<LevelComponent>());
+					pZenChan3Comp->RegisterLevel(pLevel1Go->GetComponent<LevelComponent>());
+					break;
+				case 2:
+					pLevel1Go->SetActive(false);
+					pLevel2Go->SetActive(true);
+					pLevel3Go->SetActive(false);
+					pPlayerComp->RegisterLevel(pLevel2Go->GetComponent<LevelComponent>());
+					pZenChanComp->RegisterLevel(pLevel2Go->GetComponent<LevelComponent>());
+					pZenChan2Comp->RegisterLevel(pLevel2Go->GetComponent<LevelComponent>());
+					pZenChan3Comp->RegisterLevel(pLevel2Go->GetComponent<LevelComponent>());
+					break;
+				case 3:
+					pLevel1Go->SetActive(false);
+					pLevel2Go->SetActive(false);
+					pLevel3Go->SetActive(true);
+					pPlayerComp->RegisterLevel(pLevel3Go->GetComponent<LevelComponent>());
+					pZenChanComp->RegisterLevel(pLevel3Go->GetComponent<LevelComponent>());
+					pZenChan2Comp->RegisterLevel(pLevel3Go->GetComponent<LevelComponent>());
+					pZenChan3Comp->RegisterLevel(pLevel3Go->GetComponent<LevelComponent>());
+					break;
+				}
+
+				pPlayerComp->Reset();
+
+				pZenChanComp->Reset();
+				pZenChan2Comp->Reset();
+				pZenChan3Comp->Reset();
+
+				//std::cout << "restarted single player\n";
+			};
+			pSinglePlayerScene.SetRestartFunction(RestartSinglePlayer);
+		}
+
+		{
+			// ******************
+			// MultiPlayer Scene
+			// ******************
+			auto& pMultiPlayerScene = SceneManager::GetInstance().CreateScene("MultiPlayer");
+
+			// UI Text
+			p1UpGo = std::make_shared<GameObject>();
+			p1UpTextComp = p1UpGo->AddComponent(new TextComponent("1UP", arcadeFont, 0, 255, 0));
+			p1UpGo->SetPosition(88 - p1UpTextComp->GetWidth() / 2.f, -4.f);
+			pMultiPlayerScene.Add(p1UpGo);
+
+			p1ScoreGo = std::make_shared<GameObject>();
+			p1ScoreTextComp = p1ScoreGo->AddComponent(new TextComponent("   00", arcadeFont, 255, 255, 255));
+			p1ScoreGo->SetPosition(88 - p1ScoreTextComp->GetWidth() / 2.f, 12.f);
+			pMultiPlayerScene.Add(p1ScoreGo);
+
+			p2UpGo = std::make_shared<GameObject>();
+			p2UpTextComp = p2UpGo->AddComponent(new TextComponent("2UP", arcadeFont, 0, 187, 255));
+			p2UpGo->SetPosition(screenWidth - 88 - p2UpTextComp->GetWidth() / 2.f, -4.f);
+			pMultiPlayerScene.Add(p2UpGo);
+
+			p2ScoreGo = std::make_shared<GameObject>();
+			p2ScoreTextComp = p2ScoreGo->AddComponent(new TextComponent("   00", arcadeFont, 255, 255, 255));
+			p2ScoreGo->SetPosition(screenWidth - 88 - p2ScoreTextComp->GetWidth() / 2.f, 12.f);
+			pMultiPlayerScene.Add(p2ScoreGo);
+
+			pHighScoreTitleGo = std::make_shared<GameObject>();
+			pHighScoreTitleTextComp = pHighScoreTitleGo->AddComponent(new TextComponent("HIGH SCORE", arcadeFont, 255, 0, 0));
+			pHighScoreTitleGo->SetPosition(screenWidth / 2.f - pHighScoreTitleTextComp->GetWidth() / 2.f, -4.f);
+			pMultiPlayerScene.Add(pHighScoreTitleGo);
+
+			pHighScoreGo = std::make_shared<GameObject>();
+			pHighScoreTextComp = pHighScoreGo->AddComponent(new TextComponent(" 30000", arcadeFont, 255, 255, 255));
+			pHighScoreGo->SetPosition(screenWidth / 2.f - pHighScoreTextComp->GetWidth() / 2.f, 12.f);
+			pMultiPlayerScene.Add(pHighScoreGo);
+
+			// Level1
+			auto pLevel1Go = std::make_shared<GameObject>();
+			auto pLevel1Comp = pLevel1Go->AddComponent(new LevelComponent(1));
+			pMultiPlayerScene.Add(pLevel1Go);
+
+			// Level2
+			auto pLevel2Go = std::make_shared<GameObject>();
+			pLevel2Go->AddComponent(new LevelComponent(2));
+			pMultiPlayerScene.Add(pLevel2Go);
+
+			// Level3
+			auto pLevel3Go = std::make_shared<GameObject>();
+			pLevel3Go->AddComponent(new LevelComponent(3));
+			pMultiPlayerScene.Add(pLevel3Go);
+
+			// Round# Text
+			auto pRoundGo = std::make_shared<GameObject>();
+			auto pRoundTextComp = pRoundGo->AddComponent(new TextComponent("ROUND  1", arcadeFont, 255, 255, 255));
+			auto pRoundTimedSetActiveComp = pRoundGo->AddComponent(new TimedSetActiveComponent(2.5f, false));
+			pRoundGo->SetPosition(screenWidth / 2.f - pRoundTextComp->GetWidth() / 2.f, 208.f);
+			pMultiPlayerScene.Add(pRoundGo);
+
+			auto pReadyGo = std::make_shared<GameObject>();
+			auto pReadyTextComp = pReadyGo->AddComponent(new TextComponent("READY !", arcadeFont, 255, 255, 255));
+			auto pReadyTimedSetActiveComp = pReadyGo->AddComponent(new TimedSetActiveComponent(2.5f, false));
+			pReadyGo->SetPosition(screenWidth / 2.f - pReadyTextComp->GetWidth() / 2.f, 240.f);
+			pMultiPlayerScene.Add(pReadyGo);
+
+			// Player Lives
+			auto pPlayerLives = std::make_shared<GameObject>();
+			auto pPlayerLivesComp = pPlayerLives->AddComponent(new PlayerLivesComponent(0, screenHeight - 16.f));
+			pMultiPlayerScene.Add(pPlayerLives);
+
+			// Player2 Lives
+			auto pPlayer2Lives = std::make_shared<GameObject>();
+			auto pPlayer2LivesComp = pPlayerLives->AddComponent(new PlayerLivesComponent(screenWidth - 48.f, screenHeight - 16.f));
+			pMultiPlayerScene.Add(pPlayer2Lives);
+
+			// GameOver Observer
+			//auto pGameOverGo = std::make_shared<GameObject>();
+			//auto pGameOverComponent = pGameOverGo->AddComponent(new GameOverComponent(2));
+			//pMultiPlayerScene.Add(pGameOverGo);
+
+			// Player
+			auto pPlayer = std::make_shared<GameObject>();
+			auto pPlayerComp = pPlayer->AddComponent(new PlayerComponent(48.f, screenHeight - 80.f, 1, GameState::GetInstance().GetPlayer1Lives()));
+			pPlayerComp->RegisterLevel(pLevel1Comp);
+			pPlayerComp->AddObserver(pPlayerLivesComp);
+			//pPlayerComp->AddObserver(pGameOverComponent);
+			pMultiPlayerScene.Add(pPlayer);
+
+			pPlayerLivesComp->SetSpriteId(pPlayerComp->GetSpriteId());
+			pPlayerLivesComp->InitializeLives(pPlayerComp->GetLives());
+
+			// Player2
+			auto pPlayer2 = std::make_shared<GameObject>();
+			auto pPlayer2Comp = pPlayer2->AddComponent(new PlayerComponent(screenWidth - 96.f, screenHeight - 80.f, 2, GameState::GetInstance().GetPlayer2Lives()));
+			pPlayer2Comp->RegisterLevel(pLevel1Comp);
+			pPlayer2Comp->AddObserver(pPlayer2LivesComp);
+			//pPlayer2Comp->AddObserver(pGameOverComponent);
+			pMultiPlayerScene.Add(pPlayer2);
+
+			pPlayer2LivesComp->SetSpriteId(pPlayer2Comp->GetSpriteId());
+			pPlayer2LivesComp->InitializeLives(pPlayer2Comp->GetLives());
+
+			// ZenChan Enemies
+			auto pZenChan = std::make_shared<GameObject>();
+			auto pZenChanComp = pZenChan->AddComponent(new ZenChanComponent(128.f, 64.f, EnemyFacingDirection::LEFT));
+			pZenChanComp->RegisterLevel(pLevel1Comp);
+			pMultiPlayerScene.Add(pZenChan);
+
+			auto pZenChan2 = std::make_shared<GameObject>();
+			auto pZenChan2Comp = pZenChan2->AddComponent(new ZenChanComponent(192.f, 64.f, EnemyFacingDirection::RIGHT));
+			pZenChan2Comp->RegisterLevel(pLevel1Comp);
+			pMultiPlayerScene.Add(pZenChan2);
+
+			auto pZenChan3 = std::make_shared<GameObject>();
+			auto pZenChan3Comp = pZenChan3->AddComponent(new ZenChanComponent(256.f, 64.f, EnemyFacingDirection::LEFT));
+			pZenChan3Comp->RegisterLevel(pLevel1Comp);
+			pMultiPlayerScene.Add(pZenChan3);
+
+			std::vector<ColliderComponent*> enemyColliders{};
+			enemyColliders.emplace_back(pZenChan->GetComponent<ColliderComponent>());
+			enemyColliders.emplace_back(pZenChan2->GetComponent<ColliderComponent>());
+			enemyColliders.emplace_back(pZenChan3->GetComponent<ColliderComponent>());
+
+			pPlayerComp->RegisterEnemyColliders(enemyColliders);
+			pPlayer2Comp->RegisterEnemyColliders(enemyColliders);
+
+			// Player Commands
+			Command* pPlayerMoveLeft = new MovePlayerCommand(pPlayer.get(), -1.f, 0);
+			input.AddControllerCommand(pMultiPlayerScene.GetId(), 1, ControllerButton::DPadLeft, PressType::HELD, pPlayerMoveLeft);
+			pPlayerMoveLeft = new MovePlayerCommand(pPlayer.get(), -1.f, 0);
+			input.AddKeyboardCommand(pMultiPlayerScene.GetId(), SDL_SCANCODE_LEFT, PressType::HELD, pPlayerMoveLeft);
+
+			Command* pPlayerMoveRight = new MovePlayerCommand(pPlayer.get(), 1.f, 0);
+			input.AddControllerCommand(pMultiPlayerScene.GetId(), 1, ControllerButton::DPadRight, PressType::HELD, pPlayerMoveRight);
+			pPlayerMoveRight = new MovePlayerCommand(pPlayer.get(), 1.f, 0);
+			input.AddKeyboardCommand(pMultiPlayerScene.GetId(), SDL_SCANCODE_RIGHT, PressType::HELD, pPlayerMoveRight);
+
+			Command* pPlayerMoveUp = new MovePlayerCommand(pPlayer.get(), 0, 1.f);
+			input.AddControllerCommand(pMultiPlayerScene.GetId(), 1, ControllerButton::ButtonB, PressType::DOWN, pPlayerMoveUp);
+			pPlayerMoveUp = new MovePlayerCommand(pPlayer.get(), 0, 1.f);
+			input.AddKeyboardCommand(pMultiPlayerScene.GetId(), SDL_SCANCODE_Z, PressType::DOWN, pPlayerMoveUp);
+
+			Command* pPlayerShootBubble = new ShootBubblePlayerCommand(pPlayer.get());
+			input.AddControllerCommand(pMultiPlayerScene.GetId(), 1, ControllerButton::ButtonA, PressType::DOWN, pPlayerShootBubble);
+			pPlayerShootBubble = new ShootBubblePlayerCommand(pPlayer.get());
+			input.AddKeyboardCommand(pMultiPlayerScene.GetId(), SDL_SCANCODE_X, PressType::DOWN, pPlayerShootBubble);
+
+			// Player 2 Commands
+			Command* pPlayer2MoveLeft = new MovePlayerCommand(pPlayer2.get(), -1.f, 0);
+			input.AddControllerCommand(pMultiPlayerScene.GetId(), 0, ControllerButton::DPadLeft, PressType::HELD, pPlayer2MoveLeft);
+
+			Command* pPlayer2MoveRight = new MovePlayerCommand(pPlayer2.get(), 1.f, 0);
+			input.AddControllerCommand(pMultiPlayerScene.GetId(), 0, ControllerButton::DPadRight, PressType::HELD, pPlayer2MoveRight);
+
+			Command* pPlayer2MoveUp = new MovePlayerCommand(pPlayer2.get(), 0, 1.f);
+			input.AddControllerCommand(pMultiPlayerScene.GetId(), 0, ControllerButton::ButtonB, PressType::DOWN, pPlayer2MoveUp);
+
+			Command* pPlayer2ShootBubble = new ShootBubblePlayerCommand(pPlayer2.get());
+			input.AddControllerCommand(pMultiPlayerScene.GetId(), 0, ControllerButton::ButtonA, PressType::DOWN, pPlayer2ShootBubble);
+
+			// Next level command
+			Command* pTestCommand = new TestCommand(pPlayer.get());
+			input.AddKeyboardCommand(pMultiPlayerScene.GetId(), SDL_SCANCODE_F1, PressType::DOWN, pTestCommand);
+
+			// Restart Function
+			auto RestartMultiPlayer = [&pMultiPlayerScene, &soundSystem, pRoundGo, pReadyGo, pRoundTimedSetActiveComp, pReadyTimedSetActiveComp, pPlayerComp, pPlayer2Comp, screenHeight, pLevel1Go, pLevel2Go, pLevel3Go, pZenChanComp, pZenChan2Comp, pZenChan3Comp]()
+			{
+				int levelId{ GameState::GetInstance().GetLevelId() };
+
+				soundSystem.PlayMusic(1, 1.f, -1);
+				soundSystem.StopMusic(); //todo: remove
+				pRoundTimedSetActiveComp->ResetTimer();
+				pRoundGo->SetActive(true);
+				pRoundGo->GetComponent<TextComponent>()->SetText("ROUND  " + std::to_string(levelId));
+				pReadyTimedSetActiveComp->ResetTimer();
+				pReadyGo->SetActive(true);
+
+				switch (levelId)
+				{
+				case 1:
+					pLevel1Go->SetActive(true);
+					pLevel2Go->SetActive(false);
+					pLevel3Go->SetActive(false);
+					pPlayerComp->RegisterLevel(pLevel1Go->GetComponent<LevelComponent>());
+					pPlayer2Comp->RegisterLevel(pLevel1Go->GetComponent<LevelComponent>());
+
+					pZenChanComp->RegisterLevel(pLevel1Go->GetComponent<LevelComponent>());
+					pZenChan2Comp->RegisterLevel(pLevel1Go->GetComponent<LevelComponent>());
+					pZenChan3Comp->RegisterLevel(pLevel1Go->GetComponent<LevelComponent>());
+					break;
+				case 2:
+					pLevel1Go->SetActive(false);
+					pLevel2Go->SetActive(true);
+					pLevel3Go->SetActive(false);
+					pPlayerComp->RegisterLevel(pLevel2Go->GetComponent<LevelComponent>());
+					pPlayer2Comp->RegisterLevel(pLevel2Go->GetComponent<LevelComponent>());
+
+					pZenChanComp->RegisterLevel(pLevel2Go->GetComponent<LevelComponent>());
+					pZenChan2Comp->RegisterLevel(pLevel2Go->GetComponent<LevelComponent>());
+					pZenChan3Comp->RegisterLevel(pLevel2Go->GetComponent<LevelComponent>());
+					break;
+				case 3:
+					pLevel1Go->SetActive(false);
+					pLevel2Go->SetActive(false);
+					pLevel3Go->SetActive(true);
+					pPlayerComp->RegisterLevel(pLevel3Go->GetComponent<LevelComponent>());
+					pPlayer2Comp->RegisterLevel(pLevel3Go->GetComponent<LevelComponent>());
+
+					pZenChanComp->RegisterLevel(pLevel3Go->GetComponent<LevelComponent>());
+					pZenChan2Comp->RegisterLevel(pLevel3Go->GetComponent<LevelComponent>());
+					pZenChan3Comp->RegisterLevel(pLevel3Go->GetComponent<LevelComponent>());
+					break;
+				}
+
+				pPlayerComp->Reset();
+				pPlayer2Comp->Reset();
+
+				pZenChanComp->Reset();
+				pZenChan2Comp->Reset();
+				pZenChan3Comp->Reset();
+
+				//std::cout << "restarted multi player\n";
+			};
+			pMultiPlayerScene.SetRestartFunction(RestartMultiPlayer);
+		}
 
 		//*******************************
 		// Set Starting Scene to MainMenu

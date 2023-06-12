@@ -17,23 +17,52 @@ void dae::PlayerComponent::RegisterLevel(LevelComponent* pLevelComponent)
 	m_pLevelComponent = pLevelComponent;
 }
 
+void dae::PlayerComponent::RegisterEnemyColliders(const std::vector<ColliderComponent*>& enemyColliders)
+{
+	m_EnemyColliders = enemyColliders;
+}
+
 void dae::PlayerComponent::Initialize()
 {
 	m_pSoundSystem = &ServiceLocator::GetSoundSystem();
 
 	GameObject* pGameObject = GetGameObject();
-	pGameObject->SetPosition(m_StartX /* - m_SpriteOffset*/, m_StartY);
+	pGameObject->SetPosition(m_StartX, m_StartY);
 
 	m_pPlayerAnimTexComp = pGameObject->AddComponent(new AnimatedTextureComponent("player" + std::to_string(m_SpriteId) + ".png", 64, 64, 8, 5));
 	pGameObject->AddComponent(new ColliderComponent(32, 32, false, m_SpriteOffset, 32));
 	m_pRigidBodyComponent = pGameObject->AddComponent(new RigidbodyComponent());
 
+	if (m_SpriteId == 2)
+	{
+		m_Direction = FacingDirection::LEFT;
+		m_pPlayerAnimTexComp->SetFlipped(bool(m_Direction));
+	}
+
 	SetState(PlayerState::IDLE);
+}
+
+void dae::PlayerComponent::Reset()
+{
+	m_FreezeTimer = 2.5f;
+	GetGameObject()->SetPosition(m_StartX, m_StartY);
+	SetState(PlayerState::IDLE);
+
+	if (m_SpriteId == 2)
+	{
+		m_Direction = FacingDirection::LEFT;
+		m_pPlayerAnimTexComp->SetFlipped(bool(m_Direction));
+	}
+	else
+	{
+		m_Direction = FacingDirection::RIGHT;
+		m_pPlayerAnimTexComp->SetFlipped(bool(m_Direction));
+	}
 }
 
 void dae::PlayerComponent::Move(float dirX, float dirY)
 {
-	if (m_State == PlayerState::DEAD || m_State == PlayerState::IN_BUBBLE)
+	if (m_State == PlayerState::DEAD || m_State == PlayerState::IN_BUBBLE || m_FreezeTimer > 0)
 		return;
 
 	if (dirX > 0)
@@ -48,7 +77,10 @@ void dae::PlayerComponent::Move(float dirX, float dirY)
 
 	if (m_State == PlayerState::FALLING)
 	{
-		m_CurrentXSpeed = dirX * m_MoveSpeed; //m_MoveSpeedFalling;
+		//if (m_PrevState == PlayerState::JUMPING)
+			m_CurrentXSpeed = dirX * m_MoveSpeed;
+		//else
+			//m_CurrentXSpeed = dirX * m_MoveSpeedFalling;
 	}
 	else
 	{
@@ -144,7 +176,7 @@ void dae::PlayerComponent::EnterState()
 
 void dae::PlayerComponent::ShootBubble()
 {
-	if (m_State == PlayerState::SHOOT_BUBBLE || m_State == PlayerState::DEAD)
+	if (m_State == PlayerState::SHOOT_BUBBLE || m_State == PlayerState::DEAD || m_FreezeTimer > 0)
 		return;
 
 	m_pSoundSystem->Play(3, 1.f);
@@ -153,6 +185,12 @@ void dae::PlayerComponent::ShootBubble()
 
 void dae::PlayerComponent::Update(float deltaTime)
 {
+	if (m_FreezeTimer > 0)
+	{
+		m_FreezeTimer -= deltaTime;
+		return;
+	}
+
 	switch (m_State)
 	{
 	default:
@@ -192,6 +230,8 @@ void dae::PlayerComponent::Update(float deltaTime)
 			}
 			else
 			{
+				GetGameObject()->SetActive(false);
+				NotifyObservers(unsigned(PlayerEvents::OUT_OF_LIVES));
 				//GAME OVER
 			}
 			m_DeathTimer = 0;
@@ -215,6 +255,12 @@ void dae::PlayerComponent::Update(float deltaTime)
 		m_IsGrounded = m_pRigidBodyComponent->Move(m_CurrentXSpeed * deltaTime, m_CurrentYSpeed * deltaTime, m_pLevelComponent->GetNearbyLevelTileColliders());
 	}
 
+	auto pos = GetGameObject()->GetWorldPosition();
+	if (pos.y > 448.f)
+	{
+		GetGameObject()->SetPosition(pos.x, 0 - 64.f);
+	}
+
 	if (m_CurrentXSpeed < 0)
 	{
 		m_CurrentXSpeed += m_MoveSpeed;
@@ -231,10 +277,13 @@ void dae::PlayerComponent::Update(float deltaTime)
 		m_CurrentYSpeed += m_AirDecelerationSpeed * deltaTime;
 		if (m_CurrentYSpeed > m_MaxFallSpeed) m_CurrentYSpeed = m_MaxFallSpeed;
 	}
-	else
+
+	float colX{}; float colY{};
+	if (m_State != PlayerState::DEAD && m_pRigidBodyComponent->IsCollidingWith(m_EnemyColliders, colX, colY))
 	{
-		//m_CurrentYSpeed = 0;
+		SetState(PlayerState::DEAD);
 	}
+
 }
 
 void dae::PlayerComponent::FixedUpdate(float)

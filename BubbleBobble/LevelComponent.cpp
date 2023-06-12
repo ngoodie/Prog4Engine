@@ -5,8 +5,10 @@
 #include <iostream>
 #include <fstream>
 
-dae::LevelComponent::LevelComponent(std::string levelPath)
-    : m_LevelPath{ levelPath }
+dae::LevelComponent::LevelComponent(int levelId)
+    : m_LevelId{ levelId }
+    , m_LevelPath{ "../Data/Levels/level" + std::to_string(levelId) + ".txt" }
+    
 {
 
 }
@@ -19,6 +21,8 @@ dae::LevelComponent::~LevelComponent()
 void dae::LevelComponent::Initialize()
 {
     GameObject* pGameObject = GetGameObject();
+
+    if (m_LevelId > 2) m_LevelId = 2;
 
     // load level
     std::ifstream inFile(m_LevelPath.c_str());
@@ -58,11 +62,11 @@ void dae::LevelComponent::Initialize()
 
                     if (lineNr > 0 && prevLine[linePos] == '0' && linePos > 0 && prevLine[linePos - 1] == '0')
                     {
-                        pTileShadowGo->AddComponent(new TextureComponent("tile1_shadow_side_cut_top.png"));
+                        pTileShadowGo->AddComponent(new TextureComponent("tile" + std::to_string(m_LevelId) + "_shadow_side_cut_top.png"));
                     }
                     else
                     {
-                        pTileShadowGo->AddComponent(new TextureComponent("tile1_shadow_side.png"));
+                        pTileShadowGo->AddComponent(new TextureComponent("tile" + std::to_string(m_LevelId) + "_shadow_side.png"));
                     }
                     pTileShadowGo->SetPosition(linePos * TILE_SIZE, TILE_SIZE * 2 + lineNr * TILE_SIZE);
                     pGameObject->AddChild(pTileShadowGo);
@@ -72,11 +76,11 @@ void dae::LevelComponent::Initialize()
                     auto pTileShadowGo = std::make_shared<GameObject>();
                     if (linePos > 0 && prevLine[linePos - 1] == '0')
                     {
-                        pTileShadowGo->AddComponent(new TextureComponent("tile1_shadow_btm_cut_left.png"));
+                        pTileShadowGo->AddComponent(new TextureComponent("tile" + std::to_string(m_LevelId) + "_shadow_btm_cut_left.png"));
                     }
                     else
                     {
-                        pTileShadowGo->AddComponent(new TextureComponent("tile1_shadow_btm.png"));
+                        pTileShadowGo->AddComponent(new TextureComponent("tile" + std::to_string(m_LevelId) + "_shadow_btm.png"));
                     }
                     pTileShadowGo->SetPosition(linePos * TILE_SIZE, TILE_SIZE * 2 + lineNr * TILE_SIZE);
                     pGameObject->AddChild(pTileShadowGo);
@@ -85,14 +89,14 @@ void dae::LevelComponent::Initialize()
                 if (linePos > 0 && lineNr > 0 && prevLine[linePos] == '0' && prevChar == '0' && prevLine[linePos - 1] != '0')
                 {
                     auto pTileShadowGo = std::make_shared<GameObject>();
-                    pTileShadowGo->AddComponent(new TextureComponent("tile1_shadow_corner.png"));
+                    pTileShadowGo->AddComponent(new TextureComponent("tile" + std::to_string(m_LevelId) + "_shadow_corner.png"));
                     pTileShadowGo->SetPosition(linePos * TILE_SIZE, TILE_SIZE * 2 + lineNr * TILE_SIZE);
                     pGameObject->AddChild(pTileShadowGo);
                 }
                 break;
             case '1':
                 auto pTileGo = std::make_shared<GameObject>();
-                pTileGo->AddComponent(new TextureComponent("tile1.png"));
+                pTileGo->AddComponent(new TextureComponent("tile" + std::to_string(m_LevelId) + ".png"));
                 if (lineNr > 0) m_pTilesColliders.emplace_back(pTileGo->AddComponent(new ColliderComponent(16, 16)));
                 pTileGo->SetPosition(linePos * TILE_SIZE, TILE_SIZE * 2 + lineNr * TILE_SIZE);
                 pGameObject->AddChild(pTileGo);
@@ -123,6 +127,18 @@ void dae::LevelComponent::Initialize()
             m_pBorderColliders.emplace_back(pCollider);
         }
     }
+}
+
+void dae::LevelComponent::DeleteTiles()
+{
+    auto pGameObject = GetGameObject();
+    for (auto pChild : pGameObject->GetChildren())
+    {
+        pChild.get()->SetActive(false);
+    }
+
+    m_pBorderColliders.clear();
+    m_pTilesColliders.clear();
 }
 
 void dae::LevelComponent::Update(float)

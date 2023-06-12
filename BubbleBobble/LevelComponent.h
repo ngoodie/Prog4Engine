@@ -8,7 +8,7 @@ namespace dae
 	class LevelComponent : public Component
 	{
 	public:
-		LevelComponent(std::string levelPath);
+		LevelComponent(int levelId);
 		~LevelComponent();
 
 		virtual void Initialize() override;
@@ -22,6 +22,8 @@ namespace dae
 		{
 			return m_pBorderColliders;
 		}
+
+		void DeleteTiles();
 		
 		void Update(float deltaTime) override;
 		void FixedUpdate(float deltaTime) override;
@@ -31,6 +33,7 @@ namespace dae
 		const unsigned int LEVEL_LINE_SIZE{ 32 };
 		const float TILE_SIZE{ 16.f };
 		std::string m_LevelPath;
+		int m_LevelId;
 
 		std::vector<ColliderComponent*> m_pTilesColliders{};
 		std::vector<ColliderComponent*> m_pBorderColliders{};

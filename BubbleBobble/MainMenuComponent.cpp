@@ -4,6 +4,8 @@
 #include "TextComponent.h"
 #include <iostream>
 
+#include "GameState.h"
+
 dae::MainMenuComponent::MainMenuComponent(GameObject* pLogoGo, GameObject* pGameModesContainerGo, GameObject* pSinglePlayerGo, GameObject* pCoopGo, GameObject* pVersusGo, GameObject* pSelectionArrowGo)
 	: m_State { MainMenuState::LOGO }
 	, m_pLogoGo{ pLogoGo }
@@ -108,13 +110,15 @@ void dae::MainMenuComponent::StartGameMode()
 	switch (m_Selection)
 	{
 	case 0:
+		GameState::GetInstance().SetGameMode(GameMode::SINGLEPLAYER);
 		SceneManager::GetInstance().SetScene("Intro", true);
 		break;
 	case 1:
+		GameState::GetInstance().SetGameMode(GameMode::COOP);
 		SceneManager::GetInstance().SetScene("Intro", true);
 		break;
 	case 2:
-		SceneManager::GetInstance().SetScene("Intro", true);
+		//SceneManager::GetInstance().SetScene("Intro", true);
 		break;
 	default:
 		break;

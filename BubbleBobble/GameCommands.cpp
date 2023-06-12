@@ -4,6 +4,7 @@
 #include "PlayerComponent.h"
 
 #include "SceneManager.h"
+#include "GameState.h"
 
 void dae::MM_Confirm::Execute()
 {
@@ -47,7 +48,27 @@ void dae::MM_Back::Execute()
 
 void dae::TestCommand::Execute()
 {
-	SceneManager::GetInstance().SetScene("Intro", true);
+	int levelId = GameState::GetInstance().GetLevelId();
+
+	levelId++;
+	if (levelId >= 1 && levelId <= 3)
+	{
+		GameState::GetInstance().SetLevelId(levelId);
+		GameMode gameMode = GameState::GetInstance().GetGameMode();
+
+		if (gameMode == GameMode::SINGLEPLAYER)
+		{
+			SceneManager::GetInstance().SetScene("SinglePlayer", true);
+		}
+		else if (gameMode == GameMode::COOP)
+		{
+			SceneManager::GetInstance().SetScene("MultiPlayer", true);
+		}
+	}
+	else
+	{
+		SceneManager::GetInstance().SetScene("MainMenu", true);
+	}
 }
 
 dae::MovePlayerCommand::MovePlayerCommand(GameObject* pGameObject, float dirX, float dirY)
